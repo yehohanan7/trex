@@ -1,41 +1,60 @@
 defmodule BEncoding do
 
   def decode(data) do
-    decode_binary(data)
+    decode_data(data)
   end
 
-  def decode_binary(<<?l, rest::binary>>) do
+  def decode_data([?l | rest]) do
     decode_list(rest, [])
   end
 
-  def decode_binary(<<?i, rest::binary>>) do
-    decode_integer(rest, <<>>)
+  def decode_data([?i | rest]) do
+    decode_integer(rest, [])
   end
 
-  def decode_binary(<<?d, rest::binary>>) do
-
+  def decode_data([?d | rest]) do
+    decode_dict(rest, HashDict.new)
   end
 
+  def decode_data(data) do
+    decode_string(data, [])
+  end
 
-  def decode_list(<<?e, rest::binary>>, acc) do
+  def decode_string([?: | rest], acc) do
+    int = acc |> Enum.reverse |> list_to_integer
+    {str, rest} = Enum.split(rest, int)    
+    {iolist_to_binary(str), rest}
+  end
+
+  def decode_string([x | rest], acc) do
+    decode_string(rest, [x | acc])
+  end
+
+  def decode_dict([?e | rest], acc) do
+    {{:dict, acc}, rest}
+  end
+
+  def decode_dict(data, acc) do
+    {key, rest} = decode_data(data)
+    {value, rest} = decode_data(rest)
+    decode_dict(rest, Dict.put(acc, key, value))
+  end
+
+  def decode_list([?e, rest], acc) do
     {{:list, Enum.reverse(acc)}, rest}
   end
 
   def decode_list(data, acc) do
-    {result, rest} = decode_binary(data)
+    {result, rest} = decode_data(data)
     decode_list(rest, [result | acc])
   end
 
-  def decode_integer(<<?e, rest::binary>>, acc) do
-    {acc |> String.reverse |> bitstring_to_integer, rest}
+  def decode_integer([?e, rest], acc) do
+    {acc |> Enum.reverse |> list_to_integer, rest}
   end
 
-  def decode_integer(<<x, rest::binary>>, acc) do
-    decode_integer(rest, <<x>> <> acc)
-  end
-
-  defp bitstring_to_integer (bitstring) do
-    bitstring |> bitstring_to_list |> Enum.join |> binary_to_integer
+  def decode_integer([x, rest], acc) do
+    decode_integer(rest, [x | acc])
   end
 
 end
