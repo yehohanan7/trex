@@ -22,7 +22,7 @@ defmodule BEncoding do
 
   def decode_string([?: | rest], acc) do
     int = acc |> Enum.reverse |> list_to_integer
-    {str, rest} = Enum.split(rest, int)    
+    {str, rest} = Enum.split(rest, int)
     {iolist_to_binary(str), rest}
   end
 
@@ -40,7 +40,7 @@ defmodule BEncoding do
     decode_dict(rest, Dict.put(acc, key, value))
   end
 
-  def decode_list([?e, rest], acc) do
+  def decode_list([?e | rest], acc) do
     {{:list, Enum.reverse(acc)}, rest}
   end
 
@@ -49,11 +49,11 @@ defmodule BEncoding do
     decode_list(rest, [result | acc])
   end
 
-  def decode_integer([?e, rest], acc) do
+  def decode_integer([?e | rest], acc) do
     {acc |> Enum.reverse |> list_to_integer, rest}
   end
 
-  def decode_integer([x, rest], acc) do
+  def decode_integer([x | rest], acc) do
     decode_integer(rest, [x | acc])
   end
 
