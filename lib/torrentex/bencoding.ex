@@ -1,4 +1,4 @@
-defmodule BEncoding do
+defmodule Torrentex.BEncoding do
 
   def decode(data) do
     decode_data(data)

@@ -1,4 +1,4 @@
-defmodule TorrentFile do
+defmodule Torrentx.File do
 
   defrecordp :file, TorrentFile, path: nil, size: nil
 
