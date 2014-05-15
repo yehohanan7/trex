@@ -10,7 +10,7 @@ defmodule Torrentex.Mixfile do
 
   # Configuration for the OTP application
   def application do
-    [mod: { Torrentex, [] }]
+    [mod: { Torrentex, log: :verbose}]
   end
 
   # Returns the list of dependencies in the format:

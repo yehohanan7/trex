@@ -1,5 +1,5 @@
 defmodule Torrentex.Parser do
-  def parse(file) do
-    %{:name => file}
+  def parse(content) do
+    content
   end
 end

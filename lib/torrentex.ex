@@ -3,10 +3,13 @@ defmodule Torrentex do
 
   def version, do: 1.1
 
-  # See http://elixir-lang.org/docs/stable/Application.Behaviour.html
-  # for more information on OTP Applications
-  def start(_type, _args) do
+  def start(_type, options) do
+    print_summary options
     Torrentex.Supervisor.start_link
+  end
+
+  def print_summary(options) do
+    IO.puts "debug level : #{options[:log]}"
   end
 
   def start do
