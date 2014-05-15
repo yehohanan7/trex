@@ -20,7 +20,7 @@ defmodule Torrentex.Scheduler do
   end
 
   def handle_call({:download, file}, _from, state) do
-    IO.puts "downloading #{elem file, 1}"
+    IO.puts "downloading #{file[:name]}"
     {:reply, file, state}
   end
 

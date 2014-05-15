@@ -4,7 +4,7 @@ defmodule Torrentex.Mixfile do
   def project do
     [ app: :torrentex,
       version: "0.0.1",
-      elixir: "~> 0.12.4",
+      elixir: "~> 0.13.2",
       deps: deps ]
   end
 
