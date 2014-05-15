@@ -5,7 +5,7 @@ defmodule Torrentex.TFile do
     path
     |> File.read
     |> (fn ({:ok, content}) -> content end).()
-    |> String.codepoints
+    |> :binary.bin_to_list
     |> Parser.parse
     |> (fn (content) -> %{name: path, content: content} end).()
   end

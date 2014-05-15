@@ -1,5 +1,7 @@
 defmodule Torrentex.Parser do
+  alias Torrentex.BEncoding
+
   def parse(content) do
-    content
+    parsed_content = BEncoding.decode(content)    
   end
 end

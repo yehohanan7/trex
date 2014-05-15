@@ -15,13 +15,10 @@ defmodule Torrentex.Server do
   end
 
   def handle_call({:download, file}, _from, state) do
-    file |> to_tfile |> Scheduler.schedule
+    file |> TFile.create |> Scheduler.schedule
     {:reply, file, state}
   end
 
-  def to_tfile(file) do
-    TFile.create file
-  end
 
   def handle_call(:status, _from, state) do
     {:reply, Scheduler.status, state}
