@@ -2,26 +2,22 @@ defmodule Torrentex.Server do
   use GenServer.Behaviour
 
   #External API
-  def start_link(files \\ []) do
-    :gen_server.start_link({:local, :torrentex}, __MODULE__, files, [])
+  def start_link() do
+    :gen_server.start_link({:local, :torrentex}, __MODULE__, [], [])
   end
 
   #GenServer Callbacks
-
-  def init(files) do
-    {:ok, files}
+  def init(_) do
+    {:ok, []}
   end
 
-  def handle_call({:download, file}, _from, files) do
-    {:reply, file, [file | files]}
+  def handle_call({:download, file}, _from, state) do
+    file |> Torrentex.Repo.add |> Torrentex.Scheduler.schedule
+    {:reply, file, state}
   end
 
-  def handle_call({:status, file}, _from, files) do
-    {:reply, "torrent #{file} is getting downloaded", files}
-  end
-
-  def handle_call(:pending, _from, files) do
-    {:reply, files, files}
+  def handle_call(:status, _from, state) do
+    {:reply, Torrentex.Repo.status, state}    
   end
 
 end

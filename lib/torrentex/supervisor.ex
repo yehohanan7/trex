@@ -5,9 +5,11 @@ defmodule Torrentex.Supervisor do
     :supervisor.start_link(__MODULE__, [])
   end
 
-  def init(files \\ []) do    
+  def init(_) do
     children = [
-      worker(Torrentex.Server, files)
+      worker(Torrentex.Server, []),
+      worker(Torrentex.Repo, []),
+      worker(Torrentex.Scheduler, [])
     ]
     supervise(children, strategy: :one_for_one)
   end

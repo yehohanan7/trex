@@ -1,6 +1,5 @@
 defmodule Torrentex do
   use Application.Behaviour
-  import IO
 
   def version, do: 1.1
 
@@ -19,12 +18,8 @@ defmodule Torrentex do
     :gen_server.call :torrentex, {:download, file}
   end
 
-  def status(file) do
-    :gen_server.call :torrentex, {:status, file}
-  end
-
-  def pending do
-    :gen_server.call :torrentex, :pending
+  def status do
+    :gen_server.call :torrentex, :status
   end
 
 end
