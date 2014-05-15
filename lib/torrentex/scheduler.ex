@@ -7,8 +7,11 @@ defmodule Torrentex.Scheduler do
   end
 
   def schedule(file) do
-    IO.puts "scheduling download of #{file}.."
-    file
+    file |> Torrentex.Repo.add |> (fn (file) -> :gen_server.call :scheduler, {:download, file} end).()
+  end
+
+  def status do
+    :gen_server.call :scheduler, :status
   end
 
   #GenServer Callbacks
@@ -16,8 +19,13 @@ defmodule Torrentex.Scheduler do
     {:ok, []}
   end
 
-  def handle_call({:schedule, file}, _from, state) do
+  def handle_call({:download, file}, _from, state) do
+    IO.puts "downloading #{elem file, 1}"
     {:reply, file, state}
+  end
+
+  def handle_call(:status, _from, state) do
+    {:reply, Torrentex.Repo.status, state}
   end
 
 end

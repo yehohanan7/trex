@@ -12,12 +12,12 @@ defmodule Torrentex.Server do
   end
 
   def handle_call({:download, file}, _from, state) do
-    file |> Torrentex.Repo.add |> Torrentex.Scheduler.schedule
+    file |> Torrentex.Parser.parse |> Torrentex.Scheduler.schedule
     {:reply, file, state}
   end
 
   def handle_call(:status, _from, state) do
-    {:reply, Torrentex.Repo.status, state}    
+    {:reply, Torrentex.Scheduler.status, state}
   end
 
 end
