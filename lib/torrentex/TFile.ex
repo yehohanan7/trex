@@ -9,20 +9,16 @@ defmodule Torrentex.TFile do
     file
     |> get_data
     |> :binary.bin_to_list
-    |> decode(file)
-  end
-
-  defp decode(content, file) do
-    {data, []} = BEncoding.decode(content)
-    %{name: file, content: data}
+    |> BEncoding.decode
+    |> elem(0)
   end
 
   defp get_data(file) do
-    {:ok, data} = File.read(file)
+    {:ok, data} = elem(File.read(file),1)
     data
   end
 
-  defp extract(key, %{content: {:dict, data}}) do
+  defp extract(key, {:dict, data}) do
     data[key]
   end
 
