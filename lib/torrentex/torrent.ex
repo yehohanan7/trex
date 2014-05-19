@@ -15,8 +15,7 @@ defmodule Torrentex.Torrent do
 
   def as_tfile({:dict, data}) do
     {:dict, info} = data["info"]
-    piece_length = info["piece length"]
-    total_size = info["length"]
+    piece_length = info["piece length"]; total_size = info["length"]
 
     %{
       :name              => info["name"],
