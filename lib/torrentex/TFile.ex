@@ -10,11 +10,10 @@ defmodule Torrentex.TFile do
     |> get_data
     |> :binary.bin_to_list
     |> BEncoding.decode
-    |> elem(0)
   end
 
   defp get_data(file) do
-    {:ok, data} = elem(File.read(file),1)
+    {:ok, data} = File.read(file)
     data
   end
 

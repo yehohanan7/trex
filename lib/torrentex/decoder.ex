@@ -5,7 +5,7 @@ defmodule Torrentex.Decoder do
   defmacro __using__(_)  do
     quote do
         def decode(data) do
-          decode_data(data)
+          elem(decode_data(data), 0)
         end
 
         def decode_data([?l | rest]) do
