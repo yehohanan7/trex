@@ -1,4 +1,7 @@
 defmodule Torrentex.BEncoding do
+  @moduledoc """
+  Decodes an B-Encoded torrent file.
+  """
 
   def decode(data) do
     decode_data(data)
@@ -13,7 +16,7 @@ defmodule Torrentex.BEncoding do
   end
 
   def decode_data([?d | rest]) do
-    decode_dict(rest, HashDict.new)
+    decode_dict(rest, %{})
   end
 
   def decode_data(data) do
