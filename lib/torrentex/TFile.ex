@@ -3,15 +3,19 @@ defmodule Torrentex.TFile do
   Abstracts the .torrent file by exposing API needed to access every necessary
   information from the torrent file.
   """
-
-  alias Torrentex.Parser
+  alias Torrentex.BEncoding
 
   def create(file) do
     file
     |> get_data
     |> :binary.bin_to_list
-    |> Parser.parse
+    |> parse
     |> to_tfile(file)
+  end
+
+  defp parse(content) do
+    {data, []} = BEncoding.decode(content)
+    data
   end
 
   defp to_tfile(content, file) do
@@ -72,6 +76,10 @@ defmodule Torrentex.TFile do
 
   def created_by(tfile) do
     extract("created by", tfile)
+  end
+
+  def info_hash(tfile) do
+
   end
 
 end
