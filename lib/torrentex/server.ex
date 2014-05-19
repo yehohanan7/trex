@@ -2,7 +2,7 @@ defmodule Torrentex.Server do
   use GenServer.Behaviour
   alias Torrentex.Scheduler
   alias Torrentex.Parser
-  alias Torrentex.TFile
+  alias Torrentex.Torrent
 
   #External API
   def start_link() do
@@ -15,7 +15,7 @@ defmodule Torrentex.Server do
   end
 
   def handle_call({:download, file}, _from, state) do
-    file |> TFile.create |> Scheduler.schedule
+    file |> Torrent.create |> Scheduler.schedule
     {:reply, file, state}
   end
 
