@@ -1,1 +1,2 @@
-%{"sha1": {:git, "git://github.com/nicolasff/sha1-erlang.git", "f40ded50fab8212f5a3b38b554d699826fd7cca2", []}}
+%{"hex": {:git, "git://github.com/rjsamson/hex.git", "93978a03c6828a156721d294c696e33be5127a45", []},
+  "sha1": {:git, "git://github.com/nicolasff/sha1-erlang.git", "f40ded50fab8212f5a3b38b554d699826fd7cca2", []}}

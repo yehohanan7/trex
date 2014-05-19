@@ -27,7 +27,7 @@ defmodule Torrentex.Torrent do
       :created_by        => data["created by"],
       :announce          => data["announce"],
       :announce_list     => Enum.map(elem(data["announce-list"], 1), fn {_k, [v]} -> v end),
-      :info_hash         => BEncoding.encode(info)
+      :info_hash         => :crypto.hash(:sha, BEncoding.encode(info)) |> Hex.encode
     }
   end
 
