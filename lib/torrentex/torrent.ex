@@ -20,14 +20,15 @@ defmodule Torrentex.Torrent do
 
     %{
       :name              => info["name"],
-      :size              => total_size,
       :hash              => info["filehash"],
+      :size              => total_size,
       :number_of_pieces  => round(total_size / piece_length),
       :piece_length      => piece_length,
       :creation_date     => data["creation date"],
       :created_by        => data["created by"],
       :announce          => data["announce"],
-      :announce_list     => Enum.map(elem(data["announce-list"], 1), fn {_k, [v]} -> v end)
+      :announce_list     => Enum.map(elem(data["announce-list"], 1), fn {_k, [v]} -> v end),
+      :info_hash         => BEncoding.encode(info)
     }
   end
 
