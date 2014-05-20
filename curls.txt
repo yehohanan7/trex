@@ -5,7 +5,6 @@ http://coppersurfer.tk:6969/announce
 
 curl -v 'http://pow7.com/announce?info_hash=bc869339ca06f1c29614b5e8514441fbeae968ed'
 
-
 %{announce: "udp://tracker.publicbt.com:80/announce",
  announce_list: ["udp://tracker.publicbt.com:80/announce",
   "udp://tracker.openbittorrent.com:80/announce",
@@ -21,3 +20,15 @@ curl -v 'http://pow7.com/announce?info_hash=bc869339ca06f1c29614b5e8514441fbeae9
  hash: nil, info_hash: "bc869339ca06f1c29614b5e8514441fbeae968ed",
  name: "Smashing Node.js JavaScript Everywhere.PlentyofeBooks.net.rar",
  number_of_pieces: 16, piece_length: 262144, size: 4169611}
+
+
+-----------------------------------------------------------------------------
+%{announce: "http://tracker.openbittorrent.com/announce",
+ announce_list: ["http://tracker.openbittorrent.com/announce",
+  "udp://tracker.openbittorrent.com:80/announce"], created_by: "uTorrent/1830",
+ creation_date: 1253041679, hash: nil,
+ info_hash: "0361f028de195349df99ab37ca0a99dfefd7f945",
+ name: "Sheet Music - The Lord of the Rings (Score for Concert Band).pdf",
+ number_of_pieces: 108, piece_length: 65536, size: 7080513}
+
+curl -v 'http://tracker.openbittorrent.com/announce?info_hash=0361f028de195349df99ab37ca0a99dfefd7f945'

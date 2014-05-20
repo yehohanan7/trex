@@ -11,7 +11,7 @@ defmodule Torrentex.Supervisor do
   def init(_) do
     children = [
       worker(Torrentex.Server, []),
-      worker(Torrentex.Tracker, [@udp_port, @tcp_port])
+      worker(Torrentex.UDPTracker, [@udp_port])
     ]
     supervise(children, strategy: :one_for_one)
   end
