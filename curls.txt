@@ -1,0 +1,23 @@
+http://announce.torrentsmd.com:8080/announce
+http://announce.opensharing.org:2710/announce
+http://tracker.torrentbay.to:6969/announce
+http://coppersurfer.tk:6969/announce
+
+curl -v 'http://pow7.com/announce?info_hash=bc869339ca06f1c29614b5e8514441fbeae968ed'
+
+
+%{announce: "udp://tracker.publicbt.com:80/announce",
+ announce_list: ["udp://tracker.publicbt.com:80/announce",
+  "udp://tracker.openbittorrent.com:80/announce",
+  "udp://fr33domtracker.h33t.com:3310/announce",
+  "udp://tracker.istole.it:80/announce",
+  "http://pow7.com/announce",
+  "udp://ipv4.tracker.harry.lu:80/announce",
+  "http://announce.torrentsmd.com:8080/announce",
+  "http://announce.opensharing.org:2710/announce",
+  "http://tracker.torrentbay.to:6969/announce",
+  "http://coppersurfer.tk:6969/announce"],
+ created_by: "ruTorrent (PHP Class - Adrien Gibrat)", creation_date: 1370244073,
+ hash: nil, info_hash: "bc869339ca06f1c29614b5e8514441fbeae968ed",
+ name: "Smashing Node.js JavaScript Everywhere.PlentyofeBooks.net.rar",
+ number_of_pieces: 16, piece_length: 262144, size: 4169611}

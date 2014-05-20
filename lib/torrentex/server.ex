@@ -3,10 +3,19 @@ defmodule Torrentex.Server do
   alias Torrentex.Scheduler
   alias Torrentex.Parser
   alias Torrentex.Torrent
+  alias Torrentex.Tracker
 
   #External API
   def start_link() do
     :gen_server.start_link({:local, :torrentex}, __MODULE__, [], [])
+  end
+
+  def download(path) do
+    :gen_server.call :torrentex, {:download, path}
+  end
+
+  def status do
+    :gen_server.call :torrentex, :status
   end
 
   #GenServer Callbacks
@@ -14,9 +23,11 @@ defmodule Torrentex.Server do
     {:ok, []}
   end
 
-  def handle_call({:download, file}, _from, state) do
-    file |> Torrent.create |> Scheduler.schedule
-    {:reply, file, state}
+  def handle_call({:download, path}, _from, state) do
+    path
+    |> Torrent.create
+    |> Tracker.track
+    {:reply, "Added for downloading", state}
   end
 
 

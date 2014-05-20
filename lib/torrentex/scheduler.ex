@@ -1,7 +1,6 @@
 defmodule Torrentex.Scheduler do
   use GenServer.Behaviour
-  alias Torrentex.Repo
-  alias Torrentex.TFile
+  alias Torrentex.Tracker
 
   #External API
   def start_link() do
@@ -9,9 +8,7 @@ defmodule Torrentex.Scheduler do
   end
 
   def schedule(file) do
-    file
-    |> Repo.add
-    |> download
+    download file
   end
 
   def download(file) do
@@ -27,13 +24,13 @@ defmodule Torrentex.Scheduler do
     {:ok, []}
   end
 
-  def handle_call({:download, file}, _from, state) do
-    IO.puts "downloading #{TFile.name(file)}"
-    {:reply, file, state}
+  def handle_call({:download, torrent}, _from, state) do
+    IO.puts "downloading #{torrent[:name]}"
+    {:reply, torrent, state}
   end
 
   def handle_call(:status, _from, state) do
-    {:reply, Repo.status, state}
+    {:reply, "status", state}
   end
 
 end

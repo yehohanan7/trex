@@ -1,5 +1,6 @@
 defmodule Torrentex do
   use Application.Behaviour
+  alias Torrentex.Server
 
   def version, do: 1.1
 
@@ -18,11 +19,11 @@ defmodule Torrentex do
 
   #External APIs
   def download(file) do
-    :gen_server.call :torrentex, {:download, file}
+    Server.download(file)
   end
 
   def status do
-    :gen_server.call :torrentex, :status
+    Server.status
   end
 
 end

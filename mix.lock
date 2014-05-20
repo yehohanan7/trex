@@ -1,2 +1,4 @@
 %{"hex": {:git, "git://github.com/rjsamson/hex.git", "93978a03c6828a156721d294c696e33be5127a45", []},
+  "httpotion": {:git, "git://github.com/myfreeweb/httpotion.git", "346d9c775c628dbd21657bd232a28b7cf718e6e5", []},
+  "ibrowse": {:git, "git://github.com/cmullaparthi/ibrowse.git", "7871e2ebe8811efb64e1917e2de455fa87e8dfe3", [tag: "v4.1.0"]},
   "sha1": {:git, "git://github.com/nicolasff/sha1-erlang.git", "f40ded50fab8212f5a3b38b554d699826fd7cca2", []}}
