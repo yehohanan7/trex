@@ -8,32 +8,16 @@ defmodule Torrentex.UDPTracker do
              :error     => 3}
 
   #External API
-  def start_link(port) do
-    :gen_server.start_link({:local, :tracker}, __MODULE__, port, [])
-  end
-
-  def track(torrent) do
-    :gen_server.cast :tracker, {:track, torrent}
+  def start_link(port, torrent) do
+    :gen_server.start_link(__MODULE__, [port, torrent], [])
   end
 
   #GenServer Callbacks
-  def init(port) do
+  def init([port, torrent]) do
     {:ok, socket} = :gen_udp.open(port, [:binary, {:active, true}])
-    {:ok, %{:socket => socket}}
+    {:ok, %{:socket => socket, :torrent => torrent}, 0}
   end
 
-  def handle_cast({:track, torrent}, state) do
-    IO.inspect "sending connect request to #{torrent[:announce]}"
-    send_message({state[:socket], torrent}, :connect)
-    # IO.inspect "sending announce request to #{torrent[:announce]}"
-    # send_message({state[:socket], torrent}, :announce)
-    # IO.inspect "announce request sent!"
-    {:noreply, state}
-  end
-
-  def handle_call(:status, _from, state) do
-    {:reply, "status", state}
-  end
 
   #Utilities
   defp generate_transaction_id do
@@ -51,11 +35,15 @@ defmodule Torrentex.UDPTracker do
     :ok = :gen_udp.send(socket, domain, port, <<4497486125440::64,@actions[:connect]::32, generate_transaction_id::binary>>)
   end
 
+  #initializer
+  def handle_info(:timeout, %{:socket => socket, :torrent => torrent} = state) do
+    send_message({socket, torrent}, :connect)
+    {:noreply, state}
+  end
 
   #Incoming messages from socket
   def handle_info({:udp, _, _ip, _port, packet}, state) do
-    IO.inspect "Data recieved on udp socket.."
-    IO.inspect packet
+    IO.inspect "message recieved for udp tracker #{packet}"
     {:noreply, state}
   end
 
