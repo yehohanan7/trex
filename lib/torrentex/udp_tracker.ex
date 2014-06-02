@@ -27,18 +27,23 @@ defmodule Torrentex.UDPTracker do
   #States
   def initialized(event, %{:socket => socket, :torrent => torrent} = state) do
     [domain, port] = Url.host(torrent[:announce])
-    :ok = :gen_udp.send(socket, domain, port, <<4497486125440::64,@actions[:connect]::32, generate_transaction_id::binary>>)
-    {:next_state, :connecting, state}
+    transaction_id = generate_transaction_id
+    IO.inspect transaction_id
+    :ok = :gen_udp.send(socket, domain, port, <<4497486125440::64,@actions[:connect]::32, transaction_id::binary>>)
+    {:next_state, :connecting, Dict.put(state, :transaction_id, transaction_id)}
   end
   
 
   #Socket message handlers
   def packet_recieved(:connecting, packet, state) do
-    IO.inspect "conected!!!"
-    IO.inspect "-------------------"
-    IO.inspect packet
-    IO.inspect "-------------------"
-    {:next_state, :connected, state}
+    transaction_id = state[:transaction_id]
+    case packet do
+      <<0::32, transaction_id::[size(4), binary], connection_id::binary>> -> 
+        IO.inspect "connected!"
+        {:next_state, :connected, Dict.put(state, :connection_id, connection_id)}
+      _ -> 
+        {:stop, "Invalid packet recieved while connecting", %{}}
+    end
   end
 
   def packet_recieved(:connected, packet, state) do
