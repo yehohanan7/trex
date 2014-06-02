@@ -1,13 +1,8 @@
 defmodule Torrentex.UDPTracker do
   @behaviour :gen_fsm
   alias Torrentex.Url
+  alias Torrentex.Tracker.Messages, as: Messages
 
-  @actions %{:connect   => 0,
-             :announce  => 1,
-             :scrape    => 2,
-             :error     => 3}
-
-  @connection_timeout 500
 
   #External API
   def start_link(port, torrent) do
@@ -28,31 +23,30 @@ defmodule Torrentex.UDPTracker do
   def initialized(event, %{:socket => socket, :torrent => torrent} = state) do
     [domain, port] = Url.host(torrent[:announce])
     transaction_id = generate_transaction_id
-    IO.inspect transaction_id
-    :ok = :gen_udp.send(socket, domain, port, <<4497486125440::64,@actions[:connect]::32, transaction_id::binary>>)
+
+    :ok = :gen_udp.send(socket, domain, port, Messages.connect_request(transaction_id))
     {:next_state, :connecting, Dict.put(state, :transaction_id, transaction_id)}
   end
   
 
   #Socket message handlers
-  def packet_recieved(:connecting, packet, state) do
-    transaction_id = state[:transaction_id]
-    case packet do
-      <<0::32, transaction_id::[size(4), binary], connection_id::binary>> -> 
-        IO.inspect "connected!"
-        {:next_state, :connected, Dict.put(state, :connection_id, connection_id)}
-      _ -> 
-        {:stop, "Invalid packet recieved while connecting", %{}}
-    end
+  def packet_recieved(:connecting, packet, %{:socket => socket, :torrent => torrent} = state) do
+    {connection_id: connection_id} = Messages.parse(packet, state[:transaction_id])
+    IO.inspect "connected!"
+    [domain, port] = Url.host(torrent[:announce])
+    :ok = :gen_udp.send(socket, domain, port, Messages.announce_request(state[:transaction_id], connection_id))
+
+    {:next_state, :announcing, Dict.put(state, :connection_id, connection_id)}
   end
 
-  def packet_recieved(:connected, packet, state) do
+  def packet_recieved(:announcing, packet, state) do
+    IO.inspect "announce response received"
     {:next_state, :connected, state}
   end
 
-
   #Incoming messages from socket
   def handle_info({:udp, _, _ip, _port, packet}, state_name, state) do
+    IO.inspect "packet recieved!!"
     packet_recieved(state_name, packet, state)
   end
 
