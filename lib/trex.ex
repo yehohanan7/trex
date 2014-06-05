@@ -1,12 +1,12 @@
-defmodule Torrentex do
+defmodule Trex do
   use Application.Behaviour
-  alias Torrentex.Server
+  alias Trex.Server
 
   def version, do: 1.1
 
   def start(_type, options) do
     print_summary options
-    Torrentex.Supervisor.start_link
+    Trex.Supervisor.start_link
   end
 
   def print_summary(options) do

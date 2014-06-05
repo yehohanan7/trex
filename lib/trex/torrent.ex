@@ -1,9 +1,9 @@
-defmodule Torrentex.Torrent do
+defmodule Trex.Torrent do
   @moduledoc """
   Abstracts the .torrent file by exposing API needed to access every necessary
   information from the torrent file.
   """
-  alias Torrentex.BEncoding
+  alias Trex.BEncoding
 
   def create(file) do
     file

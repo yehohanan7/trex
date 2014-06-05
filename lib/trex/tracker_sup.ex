@@ -1,4 +1,4 @@
-defmodule Torrentex.TrackerSupervisor do
+defmodule Trex.TrackerSupervisor do
   use Supervisor.Behaviour
 
   @udp_port 9998
@@ -14,13 +14,13 @@ defmodule Torrentex.TrackerSupervisor do
   end
 
   def start_tracker(:tcp, torrent) do    
-    :supervisor.start_child(:tracker_sup, worker(Torrentex.TCPTracker, [@tcp_port, torrent], []))
+    :supervisor.start_child(:tracker_sup, worker(Trex.TCPTracker, [@tcp_port, torrent], []))
   end
 
   def start_tracker(:udp, torrent) do
     IO.inspect "starting udp tracker..."
-    IO.inspect worker(Torrentex.UDPTracker, [@udp_port, torrent], [])
-    :supervisor.start_child(:tracker_sup, worker(Torrentex.UDPTracker, [@udp_port, torrent], []))
+    IO.inspect worker(Trex.UDPTracker, [@udp_port, torrent], [])
+    :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [@udp_port, torrent], []))
   end
 
 end

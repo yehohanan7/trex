@@ -1,4 +1,4 @@
-defmodule Torrentex.Decoder do
+defmodule Trex.Decoder do
   @moduledoc """
   Decodes an B-Encoded torrent file.
   """

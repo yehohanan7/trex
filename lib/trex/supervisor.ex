@@ -1,4 +1,4 @@
-defmodule Torrentex.Supervisor do
+defmodule Trex.Supervisor do
   use Supervisor.Behaviour
 
 
@@ -8,8 +8,8 @@ defmodule Torrentex.Supervisor do
 
   def init(_) do
     children = [
-      worker(Torrentex.Server, []),
-      supervisor(Torrentex.TrackerSupervisor, [])
+      worker(Trex.Server, []),
+      supervisor(Trex.TrackerSupervisor, [])
     ]
     supervise(children, strategy: :one_for_one)
   end

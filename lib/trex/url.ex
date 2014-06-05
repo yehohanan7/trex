@@ -1,4 +1,4 @@
-defmodule Torrentex.Url do
+defmodule Trex.Url do
 
   defp domain_port(url) do
     [host, _path] = String.split(url, "/")

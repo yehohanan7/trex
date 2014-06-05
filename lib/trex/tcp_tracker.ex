@@ -1,4 +1,4 @@
-defmodule Torrentex.TCPTracker do
+defmodule Trex.TCPTracker do
 
   #External API
   def start_link(port, torrent) do

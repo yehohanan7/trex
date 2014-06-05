@@ -1,6 +1,6 @@
-defmodule Torrentex.Scheduler do
+defmodule Trex.Scheduler do
   use GenServer.Behaviour
-  alias Torrentex.Tracker
+  alias Trex.Tracker
 
   #External API
   def start_link() do

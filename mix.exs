@@ -1,8 +1,8 @@
-defmodule Torrentex.Mixfile do
+defmodule Trex.Mixfile do
   use Mix.Project
 
   def project do
-    [ app: :torrentex,
+    [ app: :trex,
       version: "0.0.1",
       elixir: "~> 0.13.2",
       deps: deps ]
@@ -10,7 +10,7 @@ defmodule Torrentex.Mixfile do
 
   # Configuration for the OTP application
   def application do
-    [mod: { Torrentex, log: :verbose}]
+    [mod: { Trex, log: :verbose}]
   end
 
   # Returns the list of dependencies in the format:

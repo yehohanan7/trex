@@ -1,4 +1,4 @@
-defmodule Torrentex.Repo do
+defmodule Trexg.Repo do
   use GenServer.Behaviour
 
   #External API

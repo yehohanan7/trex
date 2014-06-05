@@ -1,7 +1,7 @@
-defmodule Torrentex.UDPTracker do
+defmodule Trex.UDPTracker do
   @behaviour :gen_fsm
-  alias Torrentex.Url
-  alias Torrentex.Tracker.Messages, as: Messages
+  alias Trex.Url
+  alias Trex.Tracker.Messages, as: Messages
 
 
   #External API
