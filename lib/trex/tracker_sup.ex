@@ -19,7 +19,6 @@ defmodule Trex.TrackerSupervisor do
 
   def start_tracker(:udp, torrent) do
     IO.inspect "starting udp tracker..."
-    IO.inspect worker(Trex.UDPTracker, [@udp_port, torrent], [])
     :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [@udp_port, torrent], []))
   end
 

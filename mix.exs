@@ -20,6 +20,7 @@ defmodule Trex.Mixfile do
   # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
   defp deps do
     [{:hex, github: "rjsamson/hex"},
-     {:httpotion, github: "myfreeweb/httpotion"}]
+     {:httpotion, github: "myfreeweb/httpotion"},
+     {:exlager, github: "khia/exlager"}]
   end
 end
