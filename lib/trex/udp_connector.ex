@@ -1,8 +1,7 @@
-defmodule Trex.UDPConnection do
+defmodule Trex.UDPConnector do
   use GenServer.Behaviour
 
   #External API
-
   def new(port, handler) do
     :gen_server.start_link(__MODULE__, [port, handler], [])
   end
