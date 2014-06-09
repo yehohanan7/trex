@@ -15,7 +15,7 @@ defmodule Trex.Tracker.Messages do
     <<connection_id::[size(8), binary], @actions[:announce]::32, transaction_id::[size(4), binary]>>
   end
   
-  def parse(packet, transaction_id) do
+  def parse_response(packet, transaction_id) do
     
     case packet do
       <<0::32, transaction_id::[size(4), binary], connection_id::binary>> -> 

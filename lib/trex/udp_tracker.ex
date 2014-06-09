@@ -2,7 +2,7 @@ defmodule Trex.UDPTracker do
   @behaviour :gen_fsm
   alias Trex.Url
   alias Trex.UDPConnector, as: Connector
-  alias Trex.Tracker.Messages, as: Messages
+  import Trex.Tracker.Messages
 
 
   #External API
@@ -10,16 +10,9 @@ defmodule Trex.UDPTracker do
     :gen_fsm.start_link(__MODULE__, [port, torrent], [])
   end
 
-  defp message_handler (pid) do
-    fn packet ->
-         :gen_fsm.send_event(pid, packet)
-    end
-  end
-
   #GenFSM Callbacks
   def init([port, torrent]) do
-    {:ok, connector} = Connector.new(port, message_handler(self()))
-    {:ok, :connector_ready, %{torrent: torrent, connector: connector}, 0}
+    {:ok, :connector_ready, %{torrent: torrent, connector: Connector.new(port, self())}, 0}
   end
 
   def terminate(_reason, _statename, _state) do
@@ -28,26 +21,31 @@ defmodule Trex.UDPTracker do
 
 
   #States
-  def connector_ready(event, %{torrent: torrent, connector: connector} = state) do
+  def connector_ready(event, state) do
     transaction_id = generate_transaction_id
 
     transaction_id
-    |> Messages.connect_request
-    |> send(Url.host(torrent[:announce]), connector)
-    
-    {:next_state, :connecting, Dict.put(state, :transaction_id, transaction_id)}
+    |> connect_request
+    |> send(Url.host(state[:torrent][:announce]), state[:connector])
+
+    {:next_state, :awaiting_connection, Dict.put(state, :transaction_id, transaction_id)}
   end
   
 
-  def connecting(packet, %{connector: connector, torrent: torrent, transaction_id: transaction_id} = state) do
-    IO.inspect "connected!"    
-    {connection_id: connection_id} = Messages.parse(packet, transaction_id)
-    :ok = Connector.send(connector, Url.host(torrent[:announce]), Messages.announce_request(state[:transaction_id], connection_id))
-    {:next_state, :announcing, Dict.put(state, :connector_id, connection_id)}
+  def awaiting_connection(packet, state) do
+    {connection_id: connection_id} = parse_response(packet, state[:transaction_id])
+    {:next_state, :connected, Dict.put(state, :connection_id, connection_id), 0}
+  end
+
+  def connected(_, state) do
+    IO.inspect "connected!!"
+    :ok = Connector.send(state[:connector], Url.host(state[:torrent][:announce]), announce_request(state[:transaction_id], state[:connection_id]))
+    {:next_state, :announcing, state}
   end
   
   def announcing(packet, state) do
     IO.inspect "announce response received"
+    IO.inspect packet
     {:reply, :connected, :connected, state}
   end
 
