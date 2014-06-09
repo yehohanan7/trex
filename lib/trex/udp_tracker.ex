@@ -46,7 +46,7 @@ defmodule Trex.UDPTracker do
   def announcing(packet, state) do
     IO.inspect "announce response received"
     IO.inspect packet
-    {:reply, :connected, :connected, state}
+    {:reply, :connected, state}
   end
 
   #Utilities
