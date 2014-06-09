@@ -1,4 +1,4 @@
-defmodule Torrentex.Encoder do
+defmodule Trex.Encoder do
 
   defmacro __using__(_)  do
     

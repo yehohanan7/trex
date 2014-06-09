@@ -1,3 +1,3 @@
-# Torrentex
+# Trex
 
 ** TODO: Add description **

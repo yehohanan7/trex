@@ -1,6 +1,6 @@
-defmodule Torrentex.Tracker do
-  alias Torrentex.UDPTracker
-  alias Torrentex.TrackerSupervisor
+defmodule Trex.Tracker do
+  alias Trex.UDPTracker
+  alias Trex.TrackerSupervisor
 
   def track(torrent) do
     case torrent[:announce] do

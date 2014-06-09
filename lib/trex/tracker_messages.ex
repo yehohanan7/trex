@@ -1,4 +1,4 @@
-defmodule Torrentex.Tracker.Messages do
+defmodule Trex.Tracker.Messages do
 
 
   @actions %{:connect   => 0,

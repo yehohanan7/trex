@@ -1,21 +1,21 @@
-defmodule Torrentex.Server do
+defmodule Trex.Server do
   use GenServer.Behaviour
-  alias Torrentex.Scheduler
-  alias Torrentex.Parser
-  alias Torrentex.Torrent
-  alias Torrentex.Tracker
+  alias Trex.Scheduler
+  alias Trex.Parser
+  alias Trex.Torrent
+  alias Trex.Tracker
 
   #External API
   def start_link() do
-    :gen_server.start_link({:local, :torrentex}, __MODULE__, [], [])
+    :gen_server.start_link({:local, :trex}, __MODULE__, [], [])
   end
 
   def download(path) do
-    :gen_server.call :torrentex, {:download, path}
+    :gen_server.call :trex, {:download, path}
   end
 
   def status do
-    :gen_server.call :torrentex, :status
+    :gen_server.call :trex, :status
   end
 
   #GenServer Callbacks
