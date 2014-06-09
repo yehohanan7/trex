@@ -11,8 +11,8 @@ defmodule Trex.Tracker.Messages do
     <<4497486125440::64,@actions[:connect]::32, transaction_id::binary>>
   end
 
-  def announce_request(transaction_id, connection_id) do
-    <<connection_id::[size(8), binary], @actions[:announce]::32, transaction_id::[size(4), binary]>>
+  def announce_request(transaction_id, connection_id, torrent) do
+    <<connection_id::[size(8), binary], @actions[:announce]::32, transaction_id::[size(4), binary], torrent[:info_hash]::[size(20), binary], 1::160,0::64, 0::64, 0::64, 0::32, 0::32, 0::32, -1::32, 9998::16>>
   end
   
   def parse_response(packet, transaction_id) do
