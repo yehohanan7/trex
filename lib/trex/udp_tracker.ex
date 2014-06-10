@@ -37,7 +37,7 @@ defmodule Trex.UDPTracker do
     {:next_state, :connected, Dict.put(state, :connection_id, connection_id), 0}
   end
 
-  def connected(_, %{torrent: torrent} = state) do
+  def connected(_event, %{torrent: torrent} = state) do
     IO.inspect "connected!!"
     :ok = Connector.send(state[:connector], Url.host(torrent[:announce]), announce_request(state[:transaction_id], state[:connection_id], torrent))
     {:next_state, :announcing, state}
@@ -45,7 +45,7 @@ defmodule Trex.UDPTracker do
   
   def announcing(packet, state) do
     IO.inspect "announce response received"
-    IO.inspect packet
+    IO.inspect(parse_response(packet, state[:transaction_id]))
     {:next_state, :announced, state}
   end
 

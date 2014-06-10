@@ -11,25 +11,43 @@ defmodule Trex.Torrent do
     |> :binary.bin_to_list
     |> BEncoding.decode
     |> as_tfile
+    |> logit
+  end
+
+  def logit (torrent) do
+    IO.inspect torrent
+    torrent
   end
 
   def as_tfile({:dict, data}) do
+
     {:dict, info} = data["info"]
     piece_length = Dict.get(info, "piece length", 1)
-    total_size = Dict.get(info, "length", 1)
+    pieces = Dict.get(info, "pieces")
+
 
     %{
-      :name              => info["name"],
-      :hash              => info["filehash"],
-      :size              => total_size,
-      :number_of_pieces  => round(total_size / piece_length),
+      :name              => Dict.get(info, "name", "downloaded"),
       :piece_length      => piece_length,
+      :pieces            => pieces,
       :creation_date     => data["creation date"],
       :created_by        => data["created by"],
       :announce          => data["announce"],
       :announce_list     => Enum.map(elem(data["announce-list"], 1), fn {_k, [v]} -> v end),
-      :info_hash         => :crypto.hash(:sha, BEncoding.encode(info)) |> Hex.encode
+      :info_hash         => :crypto.hash(:sha, BEncoding.encode(info)) |> Hex.encode,
+      :files             => file_info(info)
     }
+  end
+
+  #Single file format
+  def file_info(%{"length" => length} = info) do
+    [%{:name => info["name"], :length => length}]
+  end
+
+  #Multi file format
+  def file_info(info) do
+    {:list, files} = info["files"]
+    Enum.map(files, fn {:dict, file} -> %{length: file["length"], path: hd(elem(file["path"], 1))} end)
   end
 
   defp get_data(file) do
