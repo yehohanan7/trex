@@ -11,12 +11,6 @@ defmodule Trex.Torrent do
     |> :binary.bin_to_list
     |> BEncoding.decode
     |> as_tfile
-    |> logit
-  end
-
-  def logit (torrent) do
-    IO.inspect torrent
-    torrent
   end
 
   def as_tfile({:dict, data}) do
@@ -24,7 +18,6 @@ defmodule Trex.Torrent do
     {:dict, info} = data["info"]
     piece_length = Dict.get(info, "piece length", 1)
     pieces = Dict.get(info, "pieces")
-
 
     %{
       :name              => Dict.get(info, "name", "downloaded"),
