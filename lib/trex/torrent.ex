@@ -6,11 +6,12 @@ defmodule Trex.Torrent do
   alias Trex.BEncoding
 
   def create(file) do
-    file
+    tfile = file
     |> get_data
     |> :binary.bin_to_list
     |> BEncoding.decode
     |> as_tfile
+    Dict.put(tfile, :file_path, file)
   end
 
   def as_tfile({:dict, data}) do

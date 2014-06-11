@@ -12,9 +12,9 @@ defmodule Trex.Tracker do
   end
 
   def track(torrent) do
-    IO.inspect torrent[:announce_list]    
     tracker_urls = [torrent[:announce] | torrent[:announce_list]]
     for {url, index} <- Enum.with_index(tracker_urls), do: start_tracker(@port + index, url, torrent)
+    torrent
   end
   
 end

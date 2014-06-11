@@ -1,16 +1,12 @@
 defmodule Trex do
   use Application.Behaviour
-  alias Trex.Server
+  alias Trex.Supervisor
 
   def version, do: 1.1
 
   def start(_type, options) do
-    print_summary options
-    Trex.Supervisor.start_link
-  end
-
-  def print_summary(options) do
-    IO.puts "debug level : #{options[:log]}"
+    IO.puts "Starting Trex..."
+    Supervisor.start_link
   end
 
   def start do
@@ -19,11 +15,11 @@ defmodule Trex do
 
   #External APIs
   def download(file) do
-    Server.download(file)
+    Supervisor.start_download(file)
   end
 
   def status do
-    Server.status
+    "Not yet implemented"
   end
 
 end
