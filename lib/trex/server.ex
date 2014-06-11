@@ -18,6 +18,7 @@ defmodule Trex.Server do
     :gen_server.call :trex, :status
   end
 
+
   #GenServer Callbacks
   def init(_) do
     {:ok, []}

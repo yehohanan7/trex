@@ -12,7 +12,6 @@ defmodule Trex.UDPTracker do
 
   #GenFSM Callbacks
   def init([port, torrent, url]) do
-    IO.inspect "tracker initalizing for url: #{url}"
     {:ok, :connector_ready, %{tracker_url: url, torrent: torrent, connector: Connector.new(port, self())}, 0}
   end
 

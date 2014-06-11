@@ -16,7 +16,8 @@ defmodule Trex.TrackerSupervisor do
 
   def start_tracker(:udp, port, url, torrent) do
     IO.inspect "starting udp tracker..."
-    IO.inspect :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [port, torrent, url], [id: "#{url}_#{port}"]))
+    #child process needs an ID! otherwise it uses the module name as ID!
+    :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [port, torrent, url], [id: "#{url}_#{port}"]))
   end
 
 end
