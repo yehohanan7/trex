@@ -6,19 +6,19 @@ defmodule Trex.UDPTracker do
 
 
   #External API
-  def start_link(port, torrent) do
-    :gen_fsm.start_link(__MODULE__, [port, torrent], [])
+  def start_link(port, torrent, url) do
+    :gen_fsm.start_link(__MODULE__, [port, torrent, url], [])
   end
 
   #GenFSM Callbacks
-  def init([port, torrent]) do
-    {:ok, :connector_ready, %{torrent: torrent, connector: Connector.new(port, self())}, 0}
+  def init([port, torrent, url]) do
+    IO.inspect "tracker initalizing for url: #{url}"
+    {:ok, :connector_ready, %{tracker_url: url, torrent: torrent, connector: Connector.new(port, self())}, 0}
   end
 
   def terminate(_reason, _statename, _state) do
     :ok
   end
-
 
   #States
   def connector_ready(event, state) do
@@ -26,7 +26,7 @@ defmodule Trex.UDPTracker do
 
     transaction_id
     |> connect_request
-    |> send(Url.host(state[:torrent][:announce]), state[:connector])
+    |> send(Url.host(state[:tracker_url]), state[:connector])
 
     {:next_state, :awaiting_connection, Dict.put(state, :transaction_id, transaction_id)}
   end
@@ -39,7 +39,7 @@ defmodule Trex.UDPTracker do
 
   def connected(_event, %{torrent: torrent} = state) do
     IO.inspect "connected!!"
-    :ok = Connector.send(state[:connector], Url.host(torrent[:announce]), announce_request(state[:transaction_id], state[:connection_id], torrent))
+    :ok = Connector.send(state[:connector], Url.host(state[:tracker_url]), announce_request(state[:transaction_id], state[:connection_id], torrent))
     {:next_state, :announcing, state}
   end
   

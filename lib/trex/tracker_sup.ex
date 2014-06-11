@@ -1,9 +1,6 @@
 defmodule Trex.TrackerSupervisor do
   use Supervisor.Behaviour
 
-  @udp_port 9998
-  @tcp_port 9999
-
   def start_link do
     :supervisor.start_link({:local, :tracker_sup}, __MODULE__, [])
   end
@@ -13,13 +10,13 @@ defmodule Trex.TrackerSupervisor do
     supervise([], strategy: :one_for_one)
   end
 
-  def start_tracker(:tcp, torrent) do    
-    :supervisor.start_child(:tracker_sup, worker(Trex.TCPTracker, [@tcp_port, torrent], []))
+  def start_tracker(:tcp, port, url, torrent) do    
+    :supervisor.start_child(:tracker_sup, worker(Trex.TCPTracker, [port, torrent], []))
   end
 
-  def start_tracker(:udp, torrent) do
+  def start_tracker(:udp, port, url, torrent) do
     IO.inspect "starting udp tracker..."
-    :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [@udp_port, torrent], []))
+    IO.inspect :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [port, torrent, url], [id: "#{url}_#{port}"]))
   end
 
 end

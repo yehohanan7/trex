@@ -47,7 +47,7 @@ defmodule Trex.Tracker.Messages do
      event:           {@events[:started], 4},
      ip:              {0, 4},
      key:             {0, 4},
-     num_want:        {50, 4},
+     num_want:        {-1, 4},
      port:            {9998, 2}]
     |> to_binary       
   end
@@ -59,6 +59,9 @@ defmodule Trex.Tracker.Messages do
         {connection_id: connection_id}
 
       <<1::32, transaction_id::[size(4), binary], interval::32, leechers::32, seeder::32, rest::binary>> ->
+        IO.inspect "interval : #{interval}"
+        IO.inspect "seeder : #{seeder}"
+        IO.inspect rest
         decode_peer(rest)
 
       _ ->
