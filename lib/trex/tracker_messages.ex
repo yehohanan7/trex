@@ -18,7 +18,6 @@ defmodule Trex.Tracker.Messages do
 
   def announce_request(transaction_id, connection_id, torrent) do
     peer_id = 1; ip = key = uploaded = downloaded = left = 0; num_want = 50; port = 9998
-
     <<connection_id::[size(8), binary], @actions[:announce]::32, transaction_id::[size(4), binary], torrent[:info_hash]::[size(20), binary], 
     peer_id::160,downloaded::64, left::64, uploaded::64, @events[:started]::32, ip::32, key::32, num_want::32, 9998::16>>
   end

@@ -40,7 +40,7 @@ defmodule Trex.Torrent do
   #Multi file format
   def file_info(info) do
     {:list, files} = info["files"]
-    Enum.map(files, fn {:dict, file} -> %{length: file["length"], path: hd(elem(file["path"], 1))} end)
+    lc {:dict, file} inlist files, do: %{length: file["length"], path: hd(elem(file["path"], 1))}
   end
 
   defp get_data(file) do
