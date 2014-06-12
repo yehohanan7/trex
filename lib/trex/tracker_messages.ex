@@ -35,11 +35,11 @@ defmodule Trex.Tracker.Messages do
     |> to_binary
   end
 
-  def announce_request(transaction_id, connection_id, torrent) do
+  def announce_request(transaction_id, connection_id, info_hash) do
     [connection_id:   {connection_id, 8},
      action:          {@actions[:announce], 4},
      transaction_id:  {transaction_id, 4},
-     info_hash:       {torrent[:info_hash], 20},
+     info_hash:       {info_hash, 20},
      peer_id:         {1, 20},
      downloaded:      {0, 8},
      left:            {0, 8},

@@ -6,11 +6,14 @@ defmodule Trex.Supervisor do
   end
 
   def init(_) do
-    supervise([supervisor(Trex.TrackerSupervisor, [])], strategy: :one_for_one)
+    supervise([supervisor(Trex.TrackerSupervisor, []),
+               supervisor(Trex.DownloadSupervisor, []),
+               worker(Trex.Downloader, []),
+               worker(Trex.Tracker, [])], strategy: :one_for_one)
   end
 
-  def start_download(file) do
-    :supervisor.start_child(:trex_sup, worker(Trex.Downloader, [file], [id: file]))
+  def start_download(torrent_id, torrent) do
+    :supervisor.start_child(:trex_sup, worker(Trex.DownloadWorker, [torrent_id, torrent], [id: torrent_id]))
   end
 
 end
