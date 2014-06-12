@@ -1,19 +1,23 @@
 defmodule Trex.Supervisor do
   use Supervisor.Behaviour
+  alias Trex.PeerSupervisor
+  alias Trex.TrackerSupervisor
 
   def start_link do
     :supervisor.start_link({:local, :trex_sup}, __MODULE__, [])
   end
 
   def init(_) do
-    supervise([supervisor(Trex.TrackerSupervisor, []),
-               supervisor(Trex.DownloadSupervisor, []),
-               worker(Trex.Downloader, []),
-               worker(Trex.Tracker, [])], strategy: :one_for_one)
+    supervise([supervisor(TrackerSupervisor, []), supervisor(PeerSupervisor, [])], strategy: :one_for_one)
   end
 
-  def start_download(torrent_id, torrent) do
-    :supervisor.start_child(:trex_sup, worker(Trex.DownloadWorker, [torrent_id, torrent], [id: torrent_id]))
+  def start_peer(torrent) do
+    {:ok, peer} = PeerSupervisor.start_peer(torrent)
+    peer
+  end
+
+  def start_tracker(type, port, {tracker_host, tracker_port}, peer) do
+    {:ok, tracker} = TrackerSupervisor.start_tracker(type, port, tracker_host, tracker_port, peer)
   end
 
 end

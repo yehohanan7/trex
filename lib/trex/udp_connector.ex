@@ -8,8 +8,8 @@ defmodule Trex.UDPConnector do
     pid
   end
 
-  def send(pid, [host, port], message) do
-    :gen_server.call(pid, %{target: [host, port], message: message})
+  def send(pid, {host, port}, message) do
+    :gen_server.call(pid, %{target: {host, port}, message: message})
   end
 
 
@@ -19,7 +19,7 @@ defmodule Trex.UDPConnector do
     {:ok, %{:socket => socket, :handler => handler_pid}}
   end
 
-  def handle_call(%{target: [host, port], message: message}, _from, %{socket: socket} = state) do
+  def handle_call(%{target: {host, port}, message: message}, _from, %{socket: socket} = state) do
     {:reply, :gen_udp.send(socket, host, port, message), state}
   end
 

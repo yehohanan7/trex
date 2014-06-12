@@ -6,13 +6,13 @@ defmodule Trex.UDPTracker do
 
 
   #External API
-  def start_link(port, url, info_hash) do
-    :gen_fsm.start_link(__MODULE__, {port, url, info_hash}, [])
+  def start_link(port, tracker_host, tracker_port, peer) do
+    :gen_fsm.start_link(__MODULE__, {port, tracker_host, tracker_port, peer}, [])
   end
 
   #GenFSM Callbacks
-  def init({port, url, info_hash}) do
-    {:ok, :connector_ready, %{tracker_url: url, info_hash: info_hash, connector: Connector.new(port, self())}, 0}
+  def init({port, tracker_host, tracker_port, peer}) do
+    {:ok, :connector_ready, %{target_tracker: {tracker_host, tracker_port}, peer: peer, connector: Connector.new(port, self())}, 0}
   end
 
   def terminate(_reason, _statename, _state) do
@@ -25,7 +25,7 @@ defmodule Trex.UDPTracker do
 
     transaction_id
     |> connect_request
-    |> send(Url.host(state[:tracker_url]), state[:connector])
+    |> send(state[:target_tracker], state[:connector])
 
     {:next_state, :awaiting_connection, Dict.put(state, :transaction_id, transaction_id)}
   end
@@ -36,15 +36,17 @@ defmodule Trex.UDPTracker do
     {:next_state, :connected, Dict.put(state, :connection_id, connection_id), 0}
   end
 
-  def connected(_event, state) do
+  def connected(_event, %{peer: peer} = state) do
     IO.inspect "connected!!"
-    :ok = Connector.send(state[:connector], Url.host(state[:tracker_url]), announce_request(state[:transaction_id], state[:connection_id], state[:info_hash]))
+    info_hash = :gen_fsm.sync_send_all_state_event(peer, :get_info_hash)
+    :ok = Connector.send(state[:connector], state[:target_tracker], announce_request(state[:transaction_id], state[:connection_id], info_hash))
     {:next_state, :announcing, state}
   end
   
-  def announcing(packet, state) do
+  def announcing(packet, %{peer: peer, transaction_id: transaction_id} = state) do
     IO.inspect "announce response received"
-    IO.inspect(parse_response(packet, state[:transaction_id]))
+    IO.inspect(parse_response(packet, transaction_id))
+    :gen_fsm.send_event(peer, :peers)
     {:next_state, :announced, state}
   end
 
@@ -53,8 +55,8 @@ defmodule Trex.UDPTracker do
     :crypto.rand_bytes(4)
   end
 
-  defp send(message, target, connector) do
-    :ok = Connector.send(connector, target, message)
+  defp send(message, {tracker, port}, connector) do
+    :ok = Connector.send(connector, {tracker, port}, message)
   end
 
 

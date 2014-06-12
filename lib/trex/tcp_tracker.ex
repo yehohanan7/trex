@@ -1,12 +1,12 @@
 defmodule Trex.TCPTracker do
 
   #External API
-  def start_link(port, url, info_hash) do
-    :gen_server.start_link(__MODULE__, {port, url, info_hash}, [])
+  def start_link(port, tracker_host, tracker_port, peer) do
+    :gen_server.start_link(__MODULE__, {port, tracker_host, tracker_port, peer}, [])
   end
 
   #GenServer Callbacks
-  def init({port, url, info_hash}) do
+  def init({port, tracker_host, tracker_port, peer}) do
     IO.inspect "starting a tcp tracker..."
     {:ok, %{}, 0}
   end

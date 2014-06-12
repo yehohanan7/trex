@@ -10,14 +10,16 @@ defmodule Trex.TrackerSupervisor do
     supervise([], strategy: :one_for_one)
   end
 
-  def start_tracker(:tcp, port, url, info_hash) do    
-    :supervisor.start_child(:tracker_sup, worker(Trex.TCPTracker, [port, url, info_hash], []))
+  def start_tracker(:tcp, port, tracker_host, tracker_port, peer) do    
+    IO.inspect "starting tcp tracker..."
+    child_id = "tcp_#{port}_#{tracker_host}_#{tracker_port}"
+    :supervisor.start_child(:tracker_sup, worker(Trex.TCPTracker, [port, tracker_host, tracker_port, peer], [id: child_id]))
   end
 
-  def start_tracker(:udp, port, url, info_hash) do
+  def start_tracker(:udp, port, tracker_host, tracker_port, peer) do    
     IO.inspect "starting udp tracker..."
-    #child process needs an ID! otherwise it uses the module name as ID!
-    :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [port, url, info_hash], [id: url]))
+    child_id = "udp_#{port}_#{tracker_host}_#{tracker_port}"
+    :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [port, tracker_host, tracker_port, peer], [id: child_id]))
   end
 
 end
