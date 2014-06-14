@@ -16,8 +16,7 @@ defmodule Trex do
 
   #External APIs
   defp start_trackers(torrent) do
-    for {url, index} <- Enum.with_index([torrent[:announce]]) do
-    #for {url, index} <- Enum.with_index([torrent[:announce] | torrent[:announce_list]]) do
+    for {url, index} <- Enum.with_index([torrent[:announce] | torrent[:announce_list]]) do
       TrackerSupervisor.start_tracker(url, @port + index, torrent)
     end
     torrent
