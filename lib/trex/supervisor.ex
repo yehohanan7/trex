@@ -11,13 +11,4 @@ defmodule Trex.Supervisor do
     supervise([supervisor(TrackerSupervisor, []), supervisor(PeerSupervisor, [])], strategy: :one_for_one)
   end
 
-  def start_peer(torrent) do
-    {:ok, peer} = PeerSupervisor.start_peer(torrent)
-    peer
-  end
-
-  def start_tracker(type, port, {tracker_host, tracker_port}, peer) do
-    {:ok, tracker} = TrackerSupervisor.start_tracker(type, port, tracker_host, tracker_port, peer)
-  end
-
 end

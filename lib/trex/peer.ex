@@ -1,9 +1,14 @@
 defmodule Trex.Peer do
   @behaviour :gen_fsm
 
+
   #External API
-  def start_link(torrent) do
-    :gen_fsm.start_link(__MODULE__, torrent, [])
+  def start_link(id, torrent) do
+    :gen_fsm.start_link({:local, id}, __MODULE__, torrent, [])
+  end
+
+  def peers_found(id, peers) do
+    :gen_fsm.send_event(id, {:peers, peers})
   end
 
 
@@ -23,16 +28,10 @@ defmodule Trex.Peer do
     {:next_state, :ready, torrent}
   end
 
-  def ready(:peers, torrent) do
+  def ready({:peers, peers}, torrent) do
     IO.inspect "peers found!"
     {:next_state, :ready, torrent}
   end
-
-  #Event handlers
-  def handle_sync_event(:get_info_hash, _from, state_name, torrent) do
-    {:reply, torrent[:info_hash], state_name, torrent}
-  end
-
 
 
 end

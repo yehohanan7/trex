@@ -4,7 +4,7 @@ defmodule Trex.Mixfile do
   def project do
     [ app: :trex,
       version: "0.0.1",
-      elixir: "~> 0.13.2",
+      elixir: "~> 0.13.3",
       deps: deps ]
   end
 
@@ -19,7 +19,7 @@ defmodule Trex.Mixfile do
   # To specify particular versions, regardless of the tag, do:
   # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
   defp deps do
-    [{:hex, github: "rjsamson/hex"},
+    [{:hex, github: "yehohanan7/hex"},
      {:httpotion, github: "myfreeweb/httpotion"},
      {:exlager, github: "khia/exlager"}]
   end

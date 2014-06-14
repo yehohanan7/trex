@@ -56,7 +56,7 @@ defmodule Trex.Tracker.Messages do
 
     case packet do
       <<0::32, transaction_id::[size(4), binary], connection_id::binary>> -> 
-        {connection_id: connection_id}
+        {:connection_id, connection_id}
 
       <<1::32, transaction_id::[size(4), binary], interval::32, leechers::32, seeder::32, rest::binary>> ->
         IO.inspect "interval : #{interval}"

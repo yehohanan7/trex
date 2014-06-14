@@ -2,17 +2,20 @@ defmodule Trex.UDPTracker do
   @behaviour :gen_fsm
   alias Trex.Url
   alias Trex.UDPConnector, as: Connector
+  alias Trex.Peer
   import Trex.Tracker.Messages
 
 
   #External API
-  def start_link(port, tracker_host, tracker_port, peer) do
-    :gen_fsm.start_link(__MODULE__, {port, tracker_host, tracker_port, peer}, [])
+  def start_link(id, port, url, torrent) do
+    {tracker_host, tracker_port} = Url.parse(url)
+    IO.inspect "staring udp tracker start_link"
+    :gen_fsm.start_link({:local, id}, __MODULE__, {port, tracker_host, tracker_port, torrent}, [])
   end
 
   #GenFSM Callbacks
-  def init({port, tracker_host, tracker_port, peer}) do
-    {:ok, :connector_ready, %{target_tracker: {tracker_host, tracker_port}, peer: peer, connector: Connector.new(port, self())}, 0}
+  def init({port, tracker_host, tracker_port, torrent}) do
+    {:ok, :connector_ready, %{remote_tracker: {tracker_host, tracker_port}, torrent: torrent, connector: Connector.new(port, self())}, 0}
   end
 
   def terminate(_reason, _statename, _state) do
@@ -25,28 +28,26 @@ defmodule Trex.UDPTracker do
 
     transaction_id
     |> connect_request
-    |> send(state[:target_tracker], state[:connector])
+    |> send(state[:remote_tracker], state[:connector])
 
     {:next_state, :awaiting_connection, Dict.put(state, :transaction_id, transaction_id)}
   end
   
 
   def awaiting_connection(packet, state) do
-    {connection_id: connection_id} = parse_response(packet, state[:transaction_id])
+    {:connection_id, connection_id} = parse_response(packet, state[:transaction_id])
     {:next_state, :connected, Dict.put(state, :connection_id, connection_id), 0}
   end
 
-  def connected(_event, %{peer: peer} = state) do
+  def connected(_event, %{torrent: torrent} = state) do
     IO.inspect "connected!!"
-    info_hash = :gen_fsm.sync_send_all_state_event(peer, :get_info_hash)
-    :ok = Connector.send(state[:connector], state[:target_tracker], announce_request(state[:transaction_id], state[:connection_id], info_hash))
+    :ok = Connector.send(state[:connector], state[:remote_tracker], announce_request(state[:transaction_id], state[:connection_id], torrent[:info_hash]))
     {:next_state, :announcing, state}
   end
   
-  def announcing(packet, %{peer: peer, transaction_id: transaction_id} = state) do
+  def announcing(packet, %{torrent: torrent} = state) do
     IO.inspect "announce response received"
-    IO.inspect(parse_response(packet, transaction_id))
-    :gen_fsm.send_event(peer, :peers)
+    Peer.peers_found(torrent[:id], [:peer1, :peer2])
     {:next_state, :announced, state}
   end
 
