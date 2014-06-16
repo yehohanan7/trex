@@ -1,29 +1,36 @@
 defmodule Trex do
   use Application.Behaviour
-  alias Trex.Server
+  alias Trex.Torrent
+  alias Trex.Supervisor
+  alias Trex.TrackerSupervisor
+  alias Trex.PeerSupervisor
 
   def version, do: 1.1
 
-  def start(_type, options) do
-    print_summary options
-    Trex.Supervisor.start_link
-  end
+  @port 7771
 
-  def print_summary(options) do
-    IO.puts "debug level : #{options[:log]}"
-  end
-
-  def start do
-    start(:type, [])
+  def start(_,_) do
+    IO.puts "Starting Trex supervisor..."
+    Supervisor.start_link
   end
 
   #External APIs
-  def download(file) do
-    Server.download(file)
+  defp start_trackers(torrent) do
+    for {url, index} <- Enum.with_index([torrent[:announce] | torrent[:announce_list]]) do
+      TrackerSupervisor.start_tracker(url, @port + index, torrent)
+    end
+    torrent
   end
 
+  def download(file) do
+    Torrent.create(file)
+    |> start_trackers
+    |> PeerSupervisor.start_peer
+  end
+    
+
   def status do
-    Server.status
+    "Not yet implemented"
   end
 
 end

@@ -2,63 +2,57 @@ defmodule Trex.UDPTracker do
   @behaviour :gen_fsm
   alias Trex.Url
   alias Trex.UDPConnector, as: Connector
-  alias Trex.Tracker.Messages, as: Messages
+  alias Trex.Peer
+  import Trex.Tracker.Messages
 
+  @TIME_OUT @TIME_OUT
 
   #External API
-  def start_link(port, torrent) do
-    :gen_fsm.start_link(__MODULE__, [port, torrent], [])
-  end
-
-  defp message_handler (pid) do
-    fn packet ->
-         :gen_fsm.send_event(pid, packet)
-    end
+  def start_link(id, port, url, torrent) do
+    {tracker_host, tracker_port} = Url.parse(url)
+    :gen_fsm.start_link({:local, id}, __MODULE__, {port, tracker_host, tracker_port, torrent}, [])
   end
 
   #GenFSM Callbacks
-  def init([port, torrent]) do
-    {:ok, connector} = Connector.new(port, message_handler(self()))
-    {:ok, :connector_ready, %{torrent: torrent, connector: connector}, 0}
+  def init({port, tracker_host, tracker_port, torrent}) do
+    {:ok, :initialized, %{remote_tracker: {tracker_host, tracker_port}, torrent: torrent, port: port}, @TIME_OUT}
   end
 
   def terminate(_reason, _statename, _state) do
     :ok
   end
 
-
   #States
-  def connector_ready(event, %{torrent: torrent, connector: connector} = state) do
-    transaction_id = generate_transaction_id
-
-    transaction_id
-    |> Messages.connect_request
-    |> send(Url.host(torrent[:announce]), connector)
-    
-    {:next_state, :connecting, Dict.put(state, :transaction_id, transaction_id)}
+  def initialized(event, %{port: port} = state) do
+    {:next_state, :connector_ready, Dict.put(state, :connector, Connector.new(port, self())), @TIME_OUT}
   end
   
+  def connector_ready(_event, state) do
+    transaction_id = :crypto.rand_bytes(4)
+    :ok = Connector.send(state[:connector], state[:remote_tracker], connect_request(transaction_id))
+    {:next_state, :awaiting_connection, Dict.put(state, :transaction_id, transaction_id)}
+  end
+  
+  def awaiting_connection(packet, state) do
+    {:connection_id, connection_id} = parse_response(packet, state[:transaction_id])
+    {:next_state, :connected, Dict.put(state, :connection_id, connection_id), @TIME_OUT}
+  end
 
-  def connecting(packet, %{connector: connector, torrent: torrent, transaction_id: transaction_id} = state) do
-    IO.inspect "connected!"    
-    {connection_id: connection_id} = Messages.parse(packet, transaction_id)
-    :ok = Connector.send(connector, Url.host(torrent[:announce]), Messages.announce_request(state[:transaction_id], connection_id))
-    {:next_state, :announcing, Dict.put(state, :connector_id, connection_id)}
+  def connected(_event, %{torrent: torrent, transaction_id: transaction_id, connection_id: connection_id} = state) do
+    IO.inspect "connected!!"
+    :ok = Connector.send(state[:connector], state[:remote_tracker], announce_request(transaction_id, connection_id, torrent[:info_hash]))
+    {:next_state, :announcing, state}
   end
   
   def announcing(packet, state) do
     IO.inspect "announce response received"
-    {:reply, :connected, :connected, state}
+    {:next_state, :peers_determined, state, @TIME_OUT}
   end
 
-  #Utilities
-  defp generate_transaction_id do
-    :crypto.rand_bytes(4)
+  def peers_determined(_event, %{torrent: torrent} = state) do
+    IO.inspect "remote peers publishing to local peer...."
+    Peer.peers_found(torrent[:id], [:peer1, :peer2])
+    {:next_state, :peers_determined, state}
   end
-
-  defp send(message, target, connector) do
-    :ok = Connector.send(connector, target, message)
-  end
-
 
 end

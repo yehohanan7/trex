@@ -1,8 +1,6 @@
 %{"exlager": {:git, "git://github.com/khia/exlager.git", "99eb3fb763ae546edfe2ac3dd181987a4872dfcc", []},
   "goldrush": {:git, "git://github.com/DeadZen/goldrush.git", "71e63212f12c25827e0c1b4198d37d5d018a7fec", [tag: "0.1.6"]},
-  "hex": {:git, "git://github.com/rjsamson/hex.git", "93978a03c6828a156721d294c696e33be5127a45", []},
-  "httpotion": {:git, "git://github.com/myfreeweb/httpotion.git", "346d9c775c628dbd21657bd232a28b7cf718e6e5", []},
+  "hex": {:git, "git://github.com/yehohanan7/hex.git", "6cc2dc7ca23cc5cb8dbeefdb74aa777d613323d4", []},
+  "httpotion": {:git, "git://github.com/myfreeweb/httpotion.git", "37e180343ed21c733a1a0b740d9d8d7081b7f721", []},
   "ibrowse": {:git, "git://github.com/cmullaparthi/ibrowse.git", "7871e2ebe8811efb64e1917e2de455fa87e8dfe3", [tag: "v4.1.0"]},
-  "lager": {:git, "https://github.com/basho/lager.git", "4d8291edb72a25ac0efde907e2ecaa115108ff90", []},
-  "lagger": {:git, "git://github.com/khia/exlager.git", "99eb3fb763ae546edfe2ac3dd181987a4872dfcc", []},
-  "sha1": {:git, "git://github.com/nicolasff/sha1-erlang.git", "f40ded50fab8212f5a3b38b554d699826fd7cca2", []}}
+  "lager": {:git, "https://github.com/basho/lager.git", "4d8291edb72a25ac0efde907e2ecaa115108ff90", []}}
