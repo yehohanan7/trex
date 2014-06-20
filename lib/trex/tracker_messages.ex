@@ -47,8 +47,8 @@ defmodule Trex.Tracker.Messages do
      event:           {@events[:started], 4},
      ip:              {0, 4},
      key:             {0, 4},
-     num_want:        {-1, 4},
-     port:            {9998, 2}]
+     num_want:        {-1, 4},#port:            {9998, 2}
+    ]
     |> to_binary       
   end
   

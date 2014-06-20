@@ -8,14 +8,14 @@ defmodule Trex.UDPTracker do
   @time_out 0
 
   #External API
-  def start_link(id, port, url, torrent) do
-    {tracker_host, tracker_port} = Url.parse(url)
-    :gen_fsm.start_link({:local, id}, __MODULE__, {port, tracker_host, tracker_port, torrent}, [])
+  def start_link(id, url, torrent) do
+    {host, port} = Url.parse(url)
+    :gen_fsm.start_link({:local, id}, __MODULE__, {host, port, torrent}, [])
   end
 
   #GenFSM Callbacks
-  def init({port, tracker_host, tracker_port, torrent}) do
-    {:ok, :initialized, %{remote_tracker: {tracker_host, tracker_port}, torrent: torrent, port: port}, @time_out}
+  def init({host, port, torrent}) do
+    {:ok, :initialized, %{remote_tracker: {host, port}, torrent: torrent}, @time_out}
   end
 
   def terminate(_reason, _statename, _state) do
@@ -23,13 +23,16 @@ defmodule Trex.UDPTracker do
   end
 
   #States
-  def initialized(event, %{port: port} = state) do
-    {:next_state, :connector_ready, Dict.put(state, :connector, Connector.new(port, self())), @time_out}
+  def initialized(event, state) do
+    {:next_state, :connector_ready, Dict.put(state, :connector, Connector.new(0, self())), @time_out}
   end
   
   def connector_ready(_event, state) do
     transaction_id = :crypto.rand_bytes(4)
-    :ok = Connector.send(state[:connector], state[:remote_tracker], connect_request(transaction_id))
+    case Connector.send(state[:connector], state[:remote_tracker], connect_request(transaction_id)) do
+      {:error, reason} -> IO.inspect "error while sending connect request : #{reason}"
+      _ -> :ok
+    end
     {:next_state, :awaiting_connection, Dict.put(state, :transaction_id, transaction_id)}
   end
   
@@ -40,7 +43,10 @@ defmodule Trex.UDPTracker do
 
   def connected(_event, %{torrent: torrent, transaction_id: transaction_id, connection_id: connection_id} = state) do
     IO.inspect "connected!!"
-    :ok = Connector.send(state[:connector], state[:remote_tracker], announce_request(transaction_id, connection_id, torrent[:info_hash]))
+    case Connector.send(state[:connector], state[:remote_tracker], announce_request(transaction_id, connection_id, torrent[:info_hash])) do
+      {:error, reason} -> IO.inspect "error while sending announce request : #{reason}"
+      _ -> :ok
+    end
     {:next_state, :announcing, state}
   end
   

@@ -21,6 +21,7 @@ defmodule Trex.Mixfile do
   defp deps do
     [{:hex, github: "yehohanan7/hex"},
      {:httpotion, github: "myfreeweb/httpotion"},
+     {:apex, github: "BjRo/apex"},
      {:exlager, github: "khia/exlager"}]
   end
 end

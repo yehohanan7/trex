@@ -11,19 +11,19 @@ defmodule Trex.TrackerSupervisor do
     supervise([], strategy: :one_for_one)
   end
 
-  def start_tracker(port, url, module, torrent) do
+  def start_tracker(url, module, torrent) do
     id = string_to_atom("#{url}_#{torrent[:id]}")
-    :supervisor.start_child(:tracker_sup, worker(module, [id, port, url, torrent], [id: id]))
+    :supervisor.start_child(:tracker_sup, worker(module, [id, url, torrent], [id: id]))
   end
 
-  def start_tracker(<<"http", _::binary>> = url, port, torrent) do
+  def start_tracker(<<"http", _::binary>> = url, torrent) do
     IO.inspect "starting tcp tracker..."
-    start_tracker(port, url, Trex.TCPTracker, torrent)
+    start_tracker(url, Trex.TCPTracker, torrent)
   end
 
-  def start_tracker(<<"udp", _::binary>> = url, port, torrent) do
+  def start_tracker(<<"udp", _::binary>> = url, torrent) do
     IO.inspect "starting udp tracker..."
-    start_tracker(port, url, Trex.UDPTracker, torrent)
+    start_tracker(url, Trex.UDPTracker, torrent)
   end
 
 end
