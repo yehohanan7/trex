@@ -29,10 +29,7 @@ defmodule Trex.UDPTracker do
   
   def connector_ready(_event, state) do
     transaction_id = :crypto.rand_bytes(4)
-    case Connector.send(state[:connector], state[:remote_tracker], connect_request(transaction_id)) do
-      {:error, reason} -> IO.inspect "error while sending connect request : #{reason}"
-      _ -> :ok
-    end
+    send(state[:connector], state[:remote_tracker], connect_request(transaction_id))
     {:next_state, :awaiting_connection, Dict.put(state, :transaction_id, transaction_id)}
   end
   
@@ -43,22 +40,31 @@ defmodule Trex.UDPTracker do
 
   def connected(_event, %{torrent: torrent, transaction_id: transaction_id, connection_id: connection_id} = state) do
     IO.inspect "connected!!"
-    case Connector.send(state[:connector], state[:remote_tracker], announce_request(transaction_id, connection_id, torrent[:info_hash])) do
-      {:error, reason} -> IO.inspect "error while sending announce request : #{reason}"
-      _ -> :ok
-    end
+    {connector_pid, port} = state[:connector]
+    send(state[:connector], state[:remote_tracker], announce_request(transaction_id, connection_id, torrent[:info_hash], port))
     {:next_state, :announcing, state}
   end
   
   def announcing(packet, state) do
     IO.inspect "announce response received"
+    parse_response(packet, state[:transaction_id])
     {:next_state, :peers_determined, state, @time_out}
   end
 
-  def peers_determined(_, %{torrent: torrent} = state) do
-    IO.inspect "remote peers publishing to local peer...."
+  def peers_determined(packet, %{torrent: torrent} = state) do
     Peer.peers_found(torrent[:id], [:peer1, :peer2])
     {:next_state, :peers_determined, state}
   end
 
+
+  #Utils
+  def send({connector_pid, _}, target, request) do
+
+    case Connector.send(connector_pid, target, request) do
+      {:error, reason} -> IO.inspect "error while sending request : #{reason}"
+      _ -> :ok
+    end
+    
+  end
 end
+

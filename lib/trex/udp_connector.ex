@@ -5,7 +5,8 @@ defmodule Trex.UDPConnector do
 
   def new(port, handler_pid) do
     {:ok, pid} = :gen_server.start_link(__MODULE__, [port, handler_pid], [])
-    pid
+    {:ok, port} = :gen_server.call(pid, :get_port)
+    {pid, port}
   end
 
   def send(pid, {host, port}, message) do
@@ -13,15 +14,11 @@ defmodule Trex.UDPConnector do
     :gen_server.call(pid, %{target: {host, port}, message: message})
   end
 
-  def port(pid) do
-    :gen_server.call(pid, :get_port)
-  end
-
-
   #GenServer Callbacks
   def init([port, handler_pid]) do
     {:ok, socket} = :gen_udp.open(port, [:binary, {:active, true}])
-    {:ok, %{:socket => socket, :handler => handler_pid, :port => :inet.port(socket)}}
+    {:ok, port} =  :inet.port(socket)
+    {:ok, %{:socket => socket, :handler => handler_pid, :port => port}}
   end
 
   def handle_call(%{target: {host, port}, message: message}, _from, %{socket: socket} = state) do
@@ -29,7 +26,7 @@ defmodule Trex.UDPConnector do
   end
 
   def handle_call(:get_port, _from, %{port: port} = state) do
-    {:reply, port, state}
+    {:reply, {:ok, port}, state}
   end
 
   #Incoming messages from socket
