@@ -4,6 +4,7 @@ defmodule Trex do
   alias Trex.Supervisor
   alias Trex.TrackerSupervisor
   alias Trex.PeerSupervisor
+  alias Trex.TrackerList
 
   def version, do: 1.1
 
@@ -15,7 +16,7 @@ defmodule Trex do
 
   #External APIs
   defp start_trackers(torrent) do
-    for url <- [torrent[:announce] | torrent[:announce_list]] do
+    for url <- [torrent[:announce] | torrent[:announce_list]] ++ TrackerList.all do
       TrackerSupervisor.start_tracker(url, torrent)
     end
 

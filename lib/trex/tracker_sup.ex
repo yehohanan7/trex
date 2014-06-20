@@ -17,12 +17,12 @@ defmodule Trex.TrackerSupervisor do
   end
 
   def start_tracker(<<"http", _::binary>> = url, torrent) do
-    IO.inspect "starting tcp tracker..."
+    IO.inspect "starting tcp tracker... #{url}"
     start_tracker(url, Trex.TCPTracker, torrent)
   end
 
   def start_tracker(<<"udp", _::binary>> = url, torrent) do
-    IO.inspect "starting udp tracker..."
+    IO.inspect "starting udp tracker...#{url}"
     start_tracker(url, Trex.UDPTracker, torrent)
   end
 

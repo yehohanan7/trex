@@ -45,8 +45,8 @@ defmodule Trex.Tracker.Messages do
      uploaded:        {0, 8},
      event:           {@events[:started], 4},
      ip:              {0, 4},
-     key:             {0, 4},
-     num_want:        {50, 4},
+     key:             {:random.uniform(50000), 4},
+     num_want:        {200, 4},
      port:            {port, 2}]
     |> to_binary       
   end
@@ -60,7 +60,8 @@ defmodule Trex.Tracker.Messages do
       <<1::32, transaction_id::[size(4), binary], interval::32, leechers::32, seeder::32, rest::binary>> ->
         IO.inspect "interval : #{interval}"
         IO.inspect "seeder : #{seeder}"
-        IO.inspect(decode_peer(rest, []))
+        IO.inspect rest
+        decode_peer(rest, [])
 
       <<3::32, transaction_id::[size(4), binary], rest::binary>> ->
         IO.inspect "error packet recieved : #{rest}"
@@ -76,6 +77,9 @@ defmodule Trex.Tracker.Messages do
     decode_peer(rest, [{{a,b,c,d}, port} | acc])
   end
 
-  def decode_peer(<<>>, acc), do: acc
+  def decode_peer(<<>>, acc) do
+    IO.inspect acc
+    acc
+  end
 
 end
