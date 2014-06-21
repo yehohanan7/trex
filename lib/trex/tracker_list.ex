@@ -26,7 +26,7 @@ defmodule Trex.TrackerList do
     "udp://tracker.istole.it:80/announce",
     "udp://open.demonii.com:1337/announce",
     "udp://tracker.publicbt.com:80/announce",
-    "udp://tracker.openbittorrent.com:80announce",
+    "udp://tracker.openbittorrent.com:80/announce",
     "http://tracker.torrenty.org:6969/announce",
     "http://mgtracker.org:2710/announce",
     "http://explodie.org:6969/announce",

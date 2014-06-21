@@ -47,24 +47,25 @@ defmodule Trex.UDPTracker do
   
   def announcing(packet, state) do
     IO.inspect "announce response received"
-    parse_response(packet, state[:transaction_id])
-    {:next_state, :peers_determined, state, @time_out}
+    {:peers, peers} = parse_response(packet, state[:transaction_id])
+    {:next_state, :announced, Dict.put(state, :peers, peers), @time_out}
   end
 
-  def peers_determined(packet, %{torrent: torrent} = state) do
-    Peer.peers_found(torrent[:id], [:peer1, :peer2])
-    {:next_state, :peers_determined, state}
+  def announced(_event, %{torrent: torrent, transaction_id: transaction_id, connection_id: connection_id} = state) do
+    Peer.peers_found(torrent[:id], state[:peers])
+    {:next_state, :announced, state}
   end
-
 
   #Utils
-  def send({connector_pid, _}, target, request) do
-
-    case Connector.send(connector_pid, target, request) do
-      {:error, reason} -> IO.inspect "error while sending request : #{reason}"
-      _ -> :ok
-    end
+ def send({connector_pid, _}, target, request) do
+   
+   case Connector.send(connector_pid, target, request) do
+     {:error, reason} -> IO.inspect "error while sending request : #{reason}"
+     _ -> :ok
+   end
     
-  end
+ end
+
+
 end
 

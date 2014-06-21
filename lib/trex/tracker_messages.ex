@@ -1,5 +1,6 @@
 defmodule Trex.Tracker.Messages do
 
+
   @actions %{:connect   => 0,
              :announce  => 1,
              :scrape    => 2,
@@ -10,13 +11,7 @@ defmodule Trex.Tracker.Messages do
             :started   => 2,
             :stopped   => 3}
 
-  defp to_binary({value, :full}) when is_binary(value) do
-    <<value::binary>>
-  end
-
-  defp to_binary({value, bytes}) when is_binary(value) do
-    <<value::[size(bytes), binary]>>
-  end
+  defp to_binary(<<b::binary>> = value), do: value
 
   defp to_binary({value, bytes}) do
     bits = bytes * 8
@@ -30,16 +25,16 @@ defmodule Trex.Tracker.Messages do
   def connect_request(transaction_id) do
     [prefix:         {4497486125440, 8},
      action:         {@actions[:connect], 4},
-     transaction_id: {transaction_id, :full}]
+     transaction_id: transaction_id]
     |> to_binary
   end
 
   def announce_request(transaction_id, connection_id, info_hash, port) do
-    [connection_id:   {connection_id, 8},
+    [connection_id:   connection_id,
      action:          {@actions[:announce], 4},
-     transaction_id:  {transaction_id, 4},
-     info_hash:       {info_hash, 20},
-     peer_id:         {1, 20},
+     transaction_id:  transaction_id,
+     info_hash:       info_hash |> Hex.decode,
+     peer_id:         {12345, 20},
      downloaded:      {0, 8},
      left:            {0, 8},
      uploaded:        {0, 8},
@@ -49,6 +44,14 @@ defmodule Trex.Tracker.Messages do
      num_want:        {200, 4},
      port:            {port, 2}]
     |> to_binary       
+  end
+
+  def scrape_request(transaction_id, connection_id, info_hash) do
+    [connection_id:   connection_id,
+     action:          {@actions[:scrape], 4},
+     transaction_id:  transaction_id,
+     info_hash:       info_hash |> Hex.decode]
+    |> to_binary
   end
   
   def parse_response(packet, transaction_id) do
@@ -60,8 +63,7 @@ defmodule Trex.Tracker.Messages do
       <<1::32, transaction_id::[size(4), binary], interval::32, leechers::32, seeder::32, rest::binary>> ->
         IO.inspect "interval : #{interval}"
         IO.inspect "seeder : #{seeder}"
-        IO.inspect rest
-        decode_peer(rest, [])
+        {:peers, decode_peer(rest, [])}
 
       <<3::32, transaction_id::[size(4), binary], rest::binary>> ->
         IO.inspect "error packet recieved : #{rest}"
@@ -78,7 +80,6 @@ defmodule Trex.Tracker.Messages do
   end
 
   def decode_peer(<<>>, acc) do
-    IO.inspect acc
     acc
   end
 

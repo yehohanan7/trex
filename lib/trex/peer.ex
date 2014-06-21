@@ -8,7 +8,8 @@ defmodule Trex.Peer do
   end
 
   def peers_found(id, peers) do
-    :gen_fsm.send_event(id, {:peers, peers})
+    IO.inspect "peersssss #{IO.inspect peers}"
+    #:gen_fsm.send_event(id, :peers)
   end
 
 
@@ -23,13 +24,8 @@ defmodule Trex.Peer do
   end
 
   #States
-  def ready(event, torrent) do
+  def ready(:peers, torrent) do
     IO.inspect "peer ready!"
-    {:next_state, :ready, torrent}
-  end
-
-  def ready({:peers, peers}, torrent) do
-    IO.inspect "peers found!"
     {:next_state, :ready, torrent}
   end
 
