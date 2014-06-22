@@ -4,6 +4,7 @@ defmodule Trex.PeerSupervisor do
 
   #External API
   def start_peer(torrent) do    
+    IO.inspect "starting a new peer"
     :supervisor.start_child(:peer_sup, worker(Trex.Peer, [torrent[:id], torrent], [id: torrent[:id]]))
   end
 

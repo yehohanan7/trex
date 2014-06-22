@@ -1,5 +1,7 @@
 defmodule Trex.HttpTracker do
   @behaviour :gen_fsm
+  alias Trex.Url
+
   @time_out 0
 
   #External API
@@ -19,38 +21,11 @@ defmodule Trex.HttpTracker do
 
   #States
   def initialized(event, state) do
-    {:next_state, :connector_ready, Dict.put(state, :connector, Connector.new(0, self())), @time_out}
-  end
-  
-  def connector_ready(_event, state) do
-  end
-  
-  def awaiting_connection(packet, state) do
-
-  end
-
-  def connected(_event, %{torrent: torrent, transaction_id: transaction_id, connection_id: connection_id} = state) do
-
-  end
-  
-  def announcing(packet, state) do
-
-  end
-
-  def peers_determined(packet, %{torrent: torrent} = state) do
-
+    {:next_state, :connector_ready, state}
   end
 
 
   #Utils
-  def send({connector_pid, _}, target, request) do
-
-    case Connector.send(connector_pid, target, request) do
-      {:error, reason} -> IO.inspect "error while sending request : #{reason}"
-      _ -> :ok
-    end
-    
-  end
 
 
 end

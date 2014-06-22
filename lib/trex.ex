@@ -19,14 +19,12 @@ defmodule Trex do
     for url <- [torrent[:announce] | torrent[:announce_list]] ++ TrackerList.all do
       TrackerSupervisor.start_tracker(url, torrent)
     end
-
-    torrent
   end
 
   def download(file) do
-    Torrent.create(file)
-    |> start_trackers
-    |> PeerSupervisor.start_peer
+    torrent = Torrent.create(file)
+    PeerSupervisor.start_peer torrent
+    start_trackers torrent
   end
     
 
