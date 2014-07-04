@@ -33,8 +33,9 @@ defmodule Trex.HttpTracker do
     end
   end
 
-  def announced(_event, %{torrent: torrent, peers: peers}) do
+  def announced(_event, %{torrent: torrent, peers: peers} = state) do
     Peer.peers_found(torrent[:id], {:peers, peers})
+    {:next_state, :announced, state}
   end
 
 end
