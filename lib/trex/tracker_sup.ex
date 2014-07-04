@@ -13,11 +13,7 @@ defmodule Trex.TrackerSupervisor do
 
   def start_tracker(url, module, torrent) do
     id = string_to_atom("#{url}_#{torrent[:id]}")
-    try do
-      :supervisor.start_child(:tracker_sup, worker(module, [id, url, torrent], [id: id]))
-    catch
-      _ -> IO.inspect "hmmm"
-    end
+    :supervisor.start_child(:tracker_sup, worker(module, [id, url, torrent], [id: id]))
   end
 
   def start_tracker(<<"http", _::binary>> = url, torrent) do
