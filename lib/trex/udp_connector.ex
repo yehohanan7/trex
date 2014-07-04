@@ -10,7 +10,6 @@ defmodule Trex.UDPConnector do
   end
 
   def send(pid, {host, port}, message) do
-    IO.inspect "host : #{host}, port: #{port}"
     :gen_server.call(pid, %{target: {host, port}, message: message})
   end
 

@@ -10,7 +10,12 @@ defmodule Trex.Mixfile do
 
   # Configuration for the OTP application
   def application do
-    [mod: { Trex, log: :verbose}]
+    [
+     applications: [
+       :inets
+     ],
+     mod: { Trex, log: :verbose}
+    ]
   end
 
   # Returns the list of dependencies in the format:
@@ -19,9 +24,12 @@ defmodule Trex.Mixfile do
   # To specify particular versions, regardless of the tag, do:
   # { :barbat, "~> 0.1", github: "elixir-lang/barbat" }
   defp deps do
-    [{:hex, github: "yehohanan7/hex"},
+    [
+     #{:ibrowse, github: "cmullaparthi/ibrowse"},
+     {:hackney, github: "benoitc/hackney"},
+     {:hex, github: "yehohanan7/hex"},
      {:httpotion, github: "myfreeweb/httpotion"},
-     {:apex, github: "BjRo/apex"},
+     #{:apex, github: "BjRo/apex"},
      {:exlager, github: "khia/exlager"}]
   end
 end

@@ -31,7 +31,7 @@ defmodule Trex.Peer do
   end
 
   def ready({:peers, peers}, torrent) do
-    Apex.ap peers
+    IO.inspect peers
     {:next_state, :ready, torrent}
   end
 

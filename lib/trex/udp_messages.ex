@@ -1,4 +1,4 @@
-defmodule Trex.Tracker.Messages do
+defmodule Trex.UDP.Messages do
 
 
   @actions %{:connect   => 0,
@@ -33,7 +33,7 @@ defmodule Trex.Tracker.Messages do
     [connection_id:   connection_id,
      action:          {@actions[:announce], 4},
      transaction_id:  transaction_id,
-     info_hash:       info_hash |> Hex.decode,
+     info_hash:       info_hash,
      peer_id:         {12345, 20},
      downloaded:      {0, 8},
      left:            {0, 8},
@@ -76,7 +76,7 @@ defmodule Trex.Tracker.Messages do
 
 
   def decode_peer(<<a::8, b::8, c::8, d::8, port::16, rest::binary>>, acc) do
-    decode_peer(rest, [{{a,b,c,d}, port} | acc])
+    decode_peer(rest, [{Enum.join([a,b,c,d], "."), port} | acc])
   end
 
   def decode_peer(<<>>, acc) do

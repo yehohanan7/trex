@@ -3,7 +3,7 @@ defmodule Trex.UDPTracker do
   alias Trex.Url
   alias Trex.UDPConnector, as: Connector
   alias Trex.Peer
-  import Trex.Tracker.Messages
+  import Trex.UDP.Messages
 
   @time_out 0
 
@@ -52,7 +52,7 @@ defmodule Trex.UDPTracker do
   end
 
   def announced(_event, %{torrent: torrent, transaction_id: transaction_id, connection_id: connection_id} = state) do
-    Peer.peers_found(torrent[:id], state[:peers])
+    Peer.peers_found(torrent[:id], {:peers, state[:peers]})
     {:next_state, :announced, state}
   end
 
