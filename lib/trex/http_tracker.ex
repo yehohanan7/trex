@@ -4,10 +4,21 @@ defmodule Trex.HttpTracker do
   alias Trex.Peer
 
   @time_out 0
+  @events %{:started => "started", :stopped => "stopped", :completed => "completed"}
 
   #External API
   def start_link(id, url, torrent) do
     :gen_fsm.start_link({:local, id}, __MODULE__, {id, url, torrent}, [])
+  end
+
+  #Private utility methods
+  defp announce(url, request) do
+    try do
+      %HTTPotion.Response{body: body} = HTTPotion.get(url <> request)
+      body |> Messages.parse_response
+    rescue
+      e in HTTPotion.HTTPError -> {:stop, "could not contact the tracker", %{}}
+    end
   end
 
 
@@ -16,24 +27,16 @@ defmodule Trex.HttpTracker do
     {:ok, :initialized, %{id: id, url: url, torrent: torrent}, @time_out}
   end
 
-  def terminate(_reason, _statename, _state) do
+  def terminate(_reason, _statename, %{url: url, torrent: torrent}) do
+    announce(url, Messages.announce_request(torrent[:info_hash], @events[:stopped]))
     :ok
   end
 
   #States
   def initialized(event, %{url: url, torrent: torrent} = state) do
-    try do
-      %HTTPotion.Response{body: body} = HTTPotion.get(url <> Messages.announce_request(torrent[:info_hash]))
-      {:peers, peers} = body |> Messages.parse_response
-      {:next_state, :announced, Dict.put(state, :peers, peers), @time_out}
-    rescue
-      e in HTTPotion.HTTPError -> {:stop, "could not contact the tracker", %{}}
-    end
-  end
-
-  def announced(_event, %{torrent: torrent, peers: peers} = state) do
+    %{peers: peers, interval: interval} = announce(url, Messages.announce_request(torrent[:info_hash], @events[:started]))
     Peer.peers_found(torrent[:id], {:peers, peers})
-    {:next_state, :announced, state}
+    {:next_state, :initialized, Dict.put(state, :peers, peers), interval}
   end
 
 end
