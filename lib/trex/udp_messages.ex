@@ -29,11 +29,12 @@ defmodule Trex.UDP.Messages do
     |> to_binary
   end
 
+
   def announce_request(transaction_id, connection_id, info_hash, port) do
     [connection_id:   connection_id,
      action:          {@actions[:announce], 4},
      transaction_id:  transaction_id,
-     info_hash:       info_hash,
+     info_hash:       info_hash |> Hex.decode,
      peer_id:         {12345, 20},
      downloaded:      {0, 8},
      left:            {0, 8},
@@ -63,7 +64,6 @@ defmodule Trex.UDP.Messages do
       <<1::32, transaction_id::[size(4), binary], interval::32, leechers::32, seeder::32, rest::binary>> ->
         IO.inspect "interval : #{interval}"
         IO.inspect "seeder : #{seeder}"
-        IO.inspect "peers: #{rest}"
         %{peers: decode_peer(rest, []), interval: interval}
 
       <<3::32, transaction_id::[size(4), binary], rest::binary>> ->
