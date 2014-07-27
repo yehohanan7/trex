@@ -20,50 +20,50 @@ defmodule Trex.UDPTracker do
     :ok
   end
 
+  #private utility methods
+  def send(message, connector_pid, target) do
+    case Connector.send(connector_pid, target, message) do
+      {:error, reason} -> IO.inspect "error while sending request : #{reason}"
+      _ -> :ok
+    end
+  end
+
   #States
   def initialized(event, state) do
-    {:next_state, :connector_ready, Dict.put(state, :connector, Connector.new(0, self())), @time_out}
+    new_state = state
+                |> Dict.put(:connector, Connector.new(0, self()))
+                |> Dict.put(:transaction_id, :crypto.rand_bytes(4))
+    {:next_state, :connector_ready, new_state, @time_out}
   end
   
-  def connector_ready(_event, state) do
-    transaction_id = :crypto.rand_bytes(4)
-    send(state[:connector], state[:remote_tracker], connect_request(transaction_id))
-    {:next_state, :awaiting_connection, Dict.put(state, :transaction_id, transaction_id)}
+  def connector_ready(_event, %{connector: {connector_pid, port}, remote_tracker: remote_tracker, transaction_id: transaction_id} = state) do
+    connect_request(transaction_id) 
+    |> send(connector_pid, remote_tracker)    
+    {:next_state, :connecting, state}
   end
   
-  def awaiting_connection(packet, state) do
+  def connecting(packet, state) do
     {:connection_id, connection_id} = parse_response(packet, state[:transaction_id])
     {:next_state, :connected, Dict.put(state, :connection_id, connection_id), @time_out}
   end
 
-  def connected(_event, %{torrent: torrent, transaction_id: transaction_id, connection_id: connection_id} = state) do
+  def connected(_event, state) do
     IO.inspect "connected!!"
-    {connector_pid, port} = state[:connector]
-    send(state[:connector], state[:remote_tracker], announce_request(transaction_id, connection_id, torrent[:info_hash], port))
-    {:next_state, :announcing, state}
+    {:next_state, :announcing, state, @time_out}
   end
   
-  def announcing(packet, state) do
-    IO.inspect "announce response received"
-    {:peers, peers} = parse_response(packet, state[:transaction_id])
-    {:next_state, :announced, Dict.put(state, :peers, peers), @time_out}
-  end
-
-  def announced(_event, %{torrent: torrent, transaction_id: transaction_id, connection_id: connection_id} = state) do
-    Peer.peers_found(torrent[:id], {:peers, state[:peers]})
+  def announcing(_event, %{connector: {connector_pid, port}, connection_id: connection_id, transaction_id: transaction_id, torrent: torrent} = state) do
+    announce_request(transaction_id, connection_id, torrent[:info_hash], port) 
+    |> send(connector_pid, state[:remote_tracker])
     {:next_state, :announced, state}
   end
 
-  #Utils
- def send({connector_pid, _}, target, request) do
-   
-   case Connector.send(connector_pid, target, request) do
-     {:error, reason} -> IO.inspect "error while sending request : #{reason}"
-     _ -> :ok
-   end
-    
- end
-
+  def announced(packet, %{torrent: torrent} = state) do
+    IO.inspect "announce response received"
+    %{peers: peers, interval: interval} = parse_response(packet, state[:transaction_id])
+    Peer.peers_found(torrent[:id], {:peers, peers})
+    {:next_state, :announcing, state, interval}
+  end
 
 end
 

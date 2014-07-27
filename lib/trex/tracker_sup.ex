@@ -18,8 +18,8 @@ defmodule Trex.TrackerSupervisor do
 
   def start_tracker(<<"http", _::binary>> = url, torrent) do
     IO.inspect "starting http tracker... #{url}"
-    id = unique_id(torrent[:id], url)
-    :supervisor.start_child(:tracker_sup, worker(Trex.HttpTracker, [id, url, torrent], [id: id]))
+    #id = unique_id(torrent[:id], url)
+    #:supervisor.start_child(:tracker_sup, worker(Trex.HttpTracker, [id, url, torrent], [id: id]))
   end
 
   def start_tracker(<<"udp", _::binary>> = url, torrent) do
