@@ -29,8 +29,4 @@ defmodule Trex do
   end
     
 
-  def status do
-    "Not yet implemented"
-  end
-
 end

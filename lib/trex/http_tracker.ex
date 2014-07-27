@@ -1,6 +1,5 @@
 defmodule Trex.HttpTracker do
   @behaviour :gen_fsm
-  alias Trex.Url
   alias Trex.HTTP.Messages
   alias Trex.Peer
 
@@ -8,13 +7,13 @@ defmodule Trex.HttpTracker do
 
   #External API
   def start_link(id, url, torrent) do
-    :gen_fsm.start_link({:local, id}, __MODULE__, {url, torrent}, [])
+    :gen_fsm.start_link({:local, id}, __MODULE__, {id, url, torrent}, [])
   end
 
 
   #GenFSM Callbacks
-  def init({url, torrent}) do
-    {:ok, :initialized, %{url: url, torrent: torrent}, @time_out}
+  def init({id, url, torrent}) do
+    {:ok, :initialized, %{id: id, url: url, torrent: torrent}, @time_out}
   end
 
   def terminate(_reason, _statename, _state) do
@@ -24,9 +23,8 @@ defmodule Trex.HttpTracker do
   #States
   def initialized(event, %{url: url, torrent: torrent} = state) do
     try do
-      response = HTTPotion.get url <> Messages.announce_request(torrent[:info_hash])
-      %HTTPotion.Response{body: body} = response
-      {:peers, peers} = Messages.parse_response body
+      %HTTPotion.Response{body: body} = HTTPotion.get(url <> Messages.announce_request(torrent[:info_hash]))
+      {:peers, peers} = body |> Messages.parse_response
       {:next_state, :announced, Dict.put(state, :peers, peers), @time_out}
     rescue
       e in HTTPotion.HTTPError -> {:stop, "could not contact the tracker", %{}}

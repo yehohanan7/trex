@@ -9,12 +9,10 @@ defmodule Trex.Url do
     {to_char_list(domain), binary_to_integer(port)}
   end
 
-  def parse(<<"udp://", path::binary>>) do
+  def parse_url(<<"udp://", path::binary>>) do
     domain_port(path)
   end
 
-  def parse(<<"http://", path::binary>>) do
-    domain_port(path)
-  end
+  def parse_url(<<"http://", path::binary>> = url), do: url
 
 end

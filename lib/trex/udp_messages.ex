@@ -63,6 +63,7 @@ defmodule Trex.UDP.Messages do
       <<1::32, transaction_id::[size(4), binary], interval::32, leechers::32, seeder::32, rest::binary>> ->
         IO.inspect "interval : #{interval}"
         IO.inspect "seeder : #{seeder}"
+        IO.inspect "peers: #{rest}"
         {:peers, decode_peer(rest, [])}
 
       <<3::32, transaction_id::[size(4), binary], rest::binary>> ->

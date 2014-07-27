@@ -1,5 +1,6 @@
 defmodule Trex.TrackerSupervisor do
   use Supervisor.Behaviour
+  import Trex.Url
   import Trex.Lambda
 
   def start_link do
@@ -11,19 +12,20 @@ defmodule Trex.TrackerSupervisor do
     supervise([], strategy: :one_for_one)
   end
 
-  def start_tracker(url, module, torrent) do
-    id = string_to_atom("#{url}_#{torrent[:id]}")
-    :supervisor.start_child(:tracker_sup, worker(module, [id, url, torrent], [id: id]))
+  defp unique_id(torrent_id, url) do
+    :crypto.hash(:sha, "#{url}-#{torrent_id}") |> Hex.encode |> String.to_atom
   end
 
   def start_tracker(<<"http", _::binary>> = url, torrent) do
     IO.inspect "starting http tracker... #{url}"
-    start_tracker(url, Trex.HttpTracker, torrent)
+    id = unique_id(torrent[:id], url)
+    :supervisor.start_child(:tracker_sup, worker(Trex.HttpTracker, [id, url, torrent], [id: id]))
   end
 
   def start_tracker(<<"udp", _::binary>> = url, torrent) do
     IO.inspect "starting udp tracker...#{url}"
-    start_tracker(url, Trex.UDPTracker, torrent)
+    id = unique_id(torrent[:id], url)
+    :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [id,  parse_url(url), torrent], [id: id]))
   end
 
 end

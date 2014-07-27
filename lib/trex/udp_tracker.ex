@@ -1,6 +1,5 @@
 defmodule Trex.UDPTracker do
   @behaviour :gen_fsm
-  alias Trex.Url
   alias Trex.UDPConnector, as: Connector
   alias Trex.Peer
   import Trex.UDP.Messages
@@ -8,14 +7,13 @@ defmodule Trex.UDPTracker do
   @time_out 0
 
   #External API
-  def start_link(id, url, torrent) do
-    {host, port} = Url.parse(url)
-    :gen_fsm.start_link({:local, id}, __MODULE__, {host, port, torrent}, [])
+  def start_link(id, {host, port}, torrent) do
+    :gen_fsm.start_link({:local, id}, __MODULE__, {id, host, port, torrent}, [])
   end
 
   #GenFSM Callbacks
-  def init({host, port, torrent}) do
-    {:ok, :initialized, %{remote_tracker: {host, port}, torrent: torrent}, @time_out}
+  def init({id, host, port, torrent}) do
+    {:ok, :initialized, %{id: id, remote_tracker: {host, port}, torrent: torrent}, @time_out}
   end
 
   def terminate(_reason, _statename, _state) do
