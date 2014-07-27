@@ -62,7 +62,7 @@ defmodule Trex.UDPTracker do
     IO.inspect "announce response received"
     %{peers: peers, interval: interval} = parse_response(packet, state[:transaction_id])
     Peer.peers_found(torrent[:id], {:peers, peers})
-    {:next_state, :announcing, state, interval}
+    {:next_state, :announcing, state, interval * 1000}
   end
 
 end

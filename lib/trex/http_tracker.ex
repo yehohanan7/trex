@@ -36,7 +36,7 @@ defmodule Trex.HttpTracker do
   def initialized(event, %{url: url, torrent: torrent} = state) do
     %{peers: peers, interval: interval} = announce(url, Messages.announce_request(torrent[:info_hash], @events[:started]))
     Peer.peers_found(torrent[:id], {:peers, peers})
-    {:next_state, :initialized, Dict.put(state, :peers, peers), interval}
+    {:next_state, :initialized, Dict.put(state, :peers, peers), interval * 1000}
   end
 
 end
