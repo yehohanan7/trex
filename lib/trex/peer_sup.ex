@@ -1,5 +1,5 @@
 defmodule Trex.PeerSupervisor do
-  use Supervisor.Behaviour
+  use Supervisor
   import Trex.Lambda
 
   #External API

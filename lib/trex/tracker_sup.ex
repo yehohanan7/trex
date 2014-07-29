@@ -1,5 +1,5 @@
 defmodule Trex.TrackerSupervisor do
-  use Supervisor.Behaviour
+  use Supervisor
   import Trex.Url
   import Trex.Lambda
 
@@ -23,9 +23,9 @@ defmodule Trex.TrackerSupervisor do
   end
 
   def start_tracker(<<"udp", _::binary>> = url, torrent) do
-    IO.inspect "starting udp tracker...#{url}"
-    id = unique_id(torrent[:id], url)
-    :supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [id,  parse_url(url), torrent], [id: id]))
+    #IO.inspect "starting udp tracker...#{url}"
+    #id = unique_id(torrent[:id], url)
+    #:supervisor.start_child(:tracker_sup, worker(Trex.UDPTracker, [id,  parse_url(url), torrent], [id: id]))
   end
 
 end

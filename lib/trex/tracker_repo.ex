@@ -1,5 +1,5 @@
 defmodule Trex.TrackerRepo do
-  use GenServer.Behaviour
+  use GenServer
 
   #External API
   def start_link() do

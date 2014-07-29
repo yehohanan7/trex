@@ -1,5 +1,5 @@
 defmodule Trex.UDPConnector do
-  use GenServer.Behaviour
+  use GenServer
 
   #External API
 

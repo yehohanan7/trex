@@ -4,7 +4,7 @@ defmodule Trex.Mixfile do
   def project do
     [ app: :trex,
       version: "0.0.1",
-      elixir: "~> 0.13.3",
+      elixir: "~> 0.14.3",
       deps: deps ]
   end
 

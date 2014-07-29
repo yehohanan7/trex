@@ -60,9 +60,13 @@ defmodule Trex.UDPTracker do
 
   def announced(packet, %{torrent: torrent} = state) do
     IO.inspect "announce response received"
-    %{peers: peers, interval: interval} = parse_response(packet, state[:transaction_id])
-    Peer.peers_found(torrent[:id], {:peers, peers})
-    {:next_state, :announcing, state, interval * 1000}
+    try do
+      %{peers: peers, interval: interval} = parse_response(packet, state[:transaction_id])
+      Peer.peers_found(torrent[:id], {:peers, peers})
+      {:next_state, :announcing, state, interval * 1000}
+    rescue 
+      _ in _ -> IO.inspect "error parsing udp announce response..."; IO.inspect packet; {:next_state, :announcing, state, @time_out}
+    end
   end
 
 end

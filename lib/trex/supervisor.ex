@@ -1,5 +1,5 @@
 defmodule Trex.Supervisor do
-  use Supervisor.Behaviour
+  use Supervisor
   alias Trex.PeerSupervisor
   alias Trex.TrackerSupervisor
 

@@ -1,5 +1,5 @@
 defmodule Trex do
-  use Application.Behaviour
+  use Application
   alias Trex.Torrent
   alias Trex.Supervisor
   alias Trex.TrackerSupervisor

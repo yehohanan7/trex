@@ -6,7 +6,7 @@ defmodule Trex.Url do
       String.contains?(host, ":") -> String.split(host, ":")
       true -> [host, "80"]
     end
-    {to_char_list(domain), binary_to_integer(port)}
+    {to_char_list(domain), String.to_integer(port)}
   end
 
   def parse_url(<<"udp://", path::binary>>) do

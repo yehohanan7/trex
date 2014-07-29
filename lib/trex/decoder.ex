@@ -4,6 +4,11 @@ defmodule Trex.Decoder do
   """
   defmacro __using__(_)  do
     quote do
+
+        defp list_to_integer(x) do
+          x |> IO.chardata_to_string |> String.to_integer
+        end
+
         def decode(data) do
           elem(decode_data(data), 0)
         end
@@ -27,7 +32,7 @@ defmodule Trex.Decoder do
         def decode_string([?: | rest], acc) do
           int = acc |> Enum.reverse |> list_to_integer
           {str, rest} = Enum.split(rest, int)
-          {iodata_to_binary(str), rest}
+          {IO.iodata_to_binary(str), rest}
         end
 
         def decode_string([x | rest], acc) do

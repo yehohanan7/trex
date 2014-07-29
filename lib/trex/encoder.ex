@@ -8,7 +8,7 @@ defmodule Trex.Encoder do
       end
 
       def encode(value) when is_binary(value) do
-        "#{size(value)}:#{value}"
+        "#{String.length(value)}:#{value}"
       end
 
       def encode({:dict, d}) do
