@@ -31,6 +31,7 @@ defmodule Trex.Peer do
   end
 
   def ready({:peers, peers}, torrent) do
+    IO.inspect "peers found!"
     IO.inspect peers
     {:next_state, :ready, torrent}
   end

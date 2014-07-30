@@ -1,5 +1,6 @@
 defmodule Trex.UDP.Messages do
 
+  @default_interval 200
 
   @actions %{:connect   => 0,
              :announce  => 1,
@@ -68,8 +69,10 @@ defmodule Trex.UDP.Messages do
 
       <<3::32, transaction_id::[size(4), binary], rest::binary>> ->
         IO.inspect "error packet recieved : #{rest}"
-
-      _ -> IO.inspect "unknown response";:unknown_response
+        :error
+      
+      _ -> IO.inspect "unknown response"
+           :unknown
         
     end
 

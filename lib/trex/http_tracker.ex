@@ -4,7 +4,7 @@ defmodule Trex.HttpTracker do
   alias Trex.Peer
 
   @time_out 0
-  @retry_interval 8000
+  @retry_interval 10000
 
   @events %{:started => "started", :stopped => "stopped", :completed => "completed"}
 
@@ -25,26 +25,16 @@ defmodule Trex.HttpTracker do
 
   #States
   def initialized(event, %{url: url, torrent: torrent} = state) do
-    try do
-      %{peers: peers, interval: interval} = announce(url, torrent[:info_hash], @events[:started])
-      Peer.peers_found(torrent[:id], {:peers, peers})
-      {:next_state, :initialized, Dict.put(state, :peers, peers), interval * 1000}
-    rescue 
-      e in _ -> IO.inspect "error contacting #{url}, retrying..";IO.inspect e; {:next_state, :initialized, state, @retry_interval}
-    end
+    %{peers: peers, interval: interval} = announce(url, torrent[:info_hash], @events[:started])
+    Peer.peers_found(torrent[:id], {:peers, peers})
+    {:next_state, :initialized, Dict.put(state, :peers, peers), interval * 1000}
   end
 
   #Event handlers
-  def handle_event(_event, state_name, state) do
-    IO.inspect "peers:::";IO.inspect state[:peers]
-  end
-
   def handle_info(msg, state_name, state) do
-    IO.inspect "#{state[:url]} : "; IO.inspect msg
-    {:next_state, state_name, state}
+    raise "uknown message recieved from #{state[:url]}"
   end
 
-  
   #Private utility methods
   defp http_get(request, url) do
     %HTTPotion.Response{body: body} = HTTPotion.get(url <> request);body

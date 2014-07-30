@@ -21,7 +21,7 @@ defmodule Trex.Torrent do
     piece_length = Dict.get(info, "piece length", 1)
     pieces = Dict.get(info, "pieces")
     info_hash = :crypto.hash(:sha, BEncoding.encode(info)) |> Hex.encode
-    torrent_id = string_to_atom(info_hash)
+    torrent_id = String.to_atom(info_hash)
                                                                   
     %{
       :id                => torrent_id,

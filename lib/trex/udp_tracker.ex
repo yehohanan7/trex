@@ -3,6 +3,7 @@ defmodule Trex.UDPTracker do
   alias Trex.UDPConnector, as: Connector
   alias Trex.Peer
   import Trex.UDP.Messages
+  require IEx
 
   @time_out 0
   @retry_interval 8000
@@ -61,12 +62,13 @@ defmodule Trex.UDPTracker do
 
   def announced(packet, %{torrent: torrent} = state) do
     IO.inspect "announce response received"
-    try do
-      %{peers: peers, interval: interval} = parse_response(packet, state[:transaction_id])
-      Peer.peers_found(torrent[:id], {:peers, peers})
-      {:next_state, :announcing, state, interval * 1000}
-    rescue 
-      _ in _ -> IO.inspect "error parsing udp announce response..."; IO.inspect packet; {:next_state, :announcing, state, @retry_interval}
+
+    case parse_response(packet, state[:transaction_id]) do
+      %{peers: peers, interval: interval} -> 
+        Peer.peers_found(torrent[:id], {:peers, peers})
+        {:next_state, :announcing, state, interval * 1000}
+
+       _ -> {:next_state, :initialized, state, @time_out}
     end
   end
 
