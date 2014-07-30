@@ -5,6 +5,7 @@ defmodule Trex.UDPTracker do
   import Trex.UDP.Messages
 
   @time_out 0
+  @retry_interval 8000
 
   #External API
   def start_link(id, {host, port}, torrent) do
@@ -65,7 +66,7 @@ defmodule Trex.UDPTracker do
       Peer.peers_found(torrent[:id], {:peers, peers})
       {:next_state, :announcing, state, interval * 1000}
     rescue 
-      _ in _ -> IO.inspect "error parsing udp announce response..."; IO.inspect packet; {:next_state, :announcing, state, @time_out}
+      _ in _ -> IO.inspect "error parsing udp announce response..."; IO.inspect packet; {:next_state, :announcing, state, @retry_interval}
     end
   end
 

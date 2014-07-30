@@ -28,6 +28,7 @@ defmodule Trex.Mixfile do
      #{:ibrowse, github: "cmullaparthi/ibrowse"},
      {:hackney, github: "benoitc/hackney"},
      {:hex, github: "yehohanan7/hex"},
+     #{:hex, github: "rjsamson/hex"},
      {:httpotion, github: "myfreeweb/httpotion"},
      #{:apex, github: "BjRo/apex"},
      {:exlager, github: "khia/exlager"}]
