@@ -1,3 +1,3 @@
 # Trex
 
-** TODO: Add description **
+A bittorrent client implemented in Elixir (work in progress...)
