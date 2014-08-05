@@ -40,7 +40,7 @@ defmodule Trex.Decoder do
         end
 
         def decode_dict([?e | rest], acc) do
-          {{:dict, acc}, rest}
+          {acc, rest}
         end
 
         def decode_dict(data, acc) do
@@ -50,7 +50,7 @@ defmodule Trex.Decoder do
         end
 
         def decode_list([?e | rest], acc) do
-          {{:list, Enum.reverse(acc)}, rest}
+          {Enum.reverse(acc), rest}
         end
 
         def decode_list(data, acc) do

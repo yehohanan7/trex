@@ -1,9 +1,8 @@
 defmodule Trex.UDPTracker do
   @behaviour :gen_fsm
   alias Trex.UDPConnector, as: Connector
-  alias Trex.Peer
+  alias Trex.Torrent
   import Trex.UDP.Messages
-  require IEx
 
   @time_out 0
   @retry_interval 8000
@@ -65,7 +64,7 @@ defmodule Trex.UDPTracker do
 
     case parse_response(packet, state[:transaction_id]) do
       %{peers: peers, interval: interval} -> 
-        Peer.peers_found(torrent[:id], {:peers, peers})
+        Torrent.peers_found({:peers, peers})
         {:next_state, :announcing, state, interval * 1000}
 
        _ -> {:next_state, :initialized, state, @time_out}

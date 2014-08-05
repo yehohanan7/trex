@@ -11,11 +11,7 @@ defmodule Trex.Encoder do
         "#{byte_size(value)}:#{value}"
       end
 
-      def encode({:dict, d}) do
-        encode d
-      end
-
-      def encode({:list, xs}) do
+      def encode([_ | _] = xs) do
         "l" <> Enum.reduce(xs, <<>>, fn (x, acc) -> acc <> encode(x) end) <> "e"
       end
 

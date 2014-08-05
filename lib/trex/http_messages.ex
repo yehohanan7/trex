@@ -1,20 +1,16 @@
 defmodule Trex.HTTP.Messages do
   alias Trex.BEncoding
-  require IEx
 
   @default_interval 200
 
-  defp parse_peers(data) do
-    case data do
-      <<>> -> []
-      {:list, list} -> list
-    end
-  end
+  defp parse_peers(data) when is_binary(data), do: []
+  defp parse_peers(data), do: data
+
 
   def parse_response(data) do
-    {:dict, %{"peers" => peers, "interval" => interval}} = data |> String.strip |> :binary.bin_to_list |> BEncoding.decode
+    %{"peers" => peers, "interval" => interval} = data |> String.strip |> :binary.bin_to_list |> BEncoding.decode
     %{
-      :peers    => peers |> parse_peers |> Enum.map(fn({:dict, %{"ip" => ip, "port" => port}}) -> {ip, port} end),
+      :peers    => peers |> parse_peers |> Enum.map(fn(%{"ip" => ip, "port" => port}) -> {ip, port} end),
       :interval => interval
     }
   end

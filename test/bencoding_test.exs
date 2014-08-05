@@ -11,11 +11,11 @@ defmodule TestBEncoding do
     end
 
     test "encode list" do 
-      assert("l4:testi5ee" = encode({:list, ["test", 5]}))
+      assert("l4:testi5ee" = encode(["test", 5]))
     end
 
     test "encode dict" do 
-      assert("d4:test5:valuee" = encode({:dict, %{"test" => "value"}}))
+      assert("d4:test5:valuee" = encode(%{"test" => "value"}))
     end
 
     test "decode string" do 
@@ -27,7 +27,12 @@ defmodule TestBEncoding do
     end
 
     test "decode list" do 
-      assert({:list, ["test", "value"]} == decode('l4:test5:valuee'))
+      assert(["test", "value"] == decode('l4:test5:valuee'))
     end
+
+    test "decode dict" do
+      assert(%{"test" => "value"} == decode('d4:test5:valuee'))
+    end
+
     
 end

@@ -1,7 +1,8 @@
 defmodule Trex.HttpTracker do
   @behaviour :gen_fsm
   alias Trex.HTTP.Messages
-  alias Trex.Peer
+  alias Trex.Torrent
+  import IEx
 
   @time_out 0
   @retry_interval 10000
@@ -19,14 +20,14 @@ defmodule Trex.HttpTracker do
   end
 
   def terminate(_reason, _statename, %{url: url, torrent: torrent}) do
-    announce(url, torrent[:info_hash], @events[:stopped]);
+    #announce(url, torrent[:info_hash], @events[:stopped]);
     :ok
   end
 
   #States
   def initialized(event, %{url: url, torrent: torrent} = state) do
     %{peers: peers, interval: interval} = announce(url, torrent[:info_hash], @events[:started])
-    Peer.peers_found(torrent[:id], {:peers, peers})
+    Torrent.peers_found({:peers, peers})
     {:next_state, :initialized, Dict.put(state, :peers, peers), interval * 1000}
   end
 
@@ -36,14 +37,10 @@ defmodule Trex.HttpTracker do
   end
 
   #Private utility methods
-  defp http_get(request, url) do
-    %HTTPotion.Response{body: body} = HTTPotion.get(url <> request);body
-  end
-
   defp announce(url, info_hash, event) do
-    Messages.announce_request_params(info_hash, event)
-    |> http_get(url)
-    |> Messages.parse_response
+    request = Messages.announce_request_params(info_hash, event)
+    %HTTPotion.Response{body: body} = HTTPotion.get(url <> request)
+    Messages.parse_response body
   end
 
 

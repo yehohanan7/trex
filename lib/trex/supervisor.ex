@@ -1,6 +1,6 @@
 defmodule Trex.Supervisor do
   use Supervisor
-  alias Trex.PeerSupervisor
+  alias Trex.TorrentSupervisor
   alias Trex.TrackerSupervisor
 
   def start_link do
@@ -8,7 +8,7 @@ defmodule Trex.Supervisor do
   end
 
   def init(_) do
-    supervise([supervisor(TrackerSupervisor, []), supervisor(PeerSupervisor, [])], strategy: :one_for_one)
+    supervise([supervisor(TrackerSupervisor, []), supervisor(TorrentSupervisor, [])], strategy: :one_for_one)
   end
 
 end
