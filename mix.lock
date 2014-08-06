@@ -1,4 +1,5 @@
 %{"apex": {:git, "git://github.com/BjRo/apex.git", "960227c9e7dd02a31429b62f547d938a3a617c8d", []},
+  "erlubi": {:git, "git://github.com/krestenkrab/erlubi.git", "2610626e17e1aad52aad2fb4953e373391f2bcf0", []},
   "exlager": {:git, "git://github.com/khia/exlager.git", "99eb3fb763ae546edfe2ac3dd181987a4872dfcc", []},
   "goldrush": {:git, "git://github.com/DeadZen/goldrush.git", "71e63212f12c25827e0c1b4198d37d5d018a7fec", [tag: "0.1.6"]},
   "hackney": {:git, "git://github.com/benoitc/hackney.git", "e18bdd2f68840c8fddd77875b06079087290e5cc", []},
@@ -7,4 +8,5 @@
   "httpotion": {:git, "git://github.com/myfreeweb/httpotion.git", "a6bcbbac7b6f15ee93c5c941de36d59ef8c85743", []},
   "ibrowse": {:git, "git://github.com/cmullaparthi/ibrowse.git", "7871e2ebe8811efb64e1917e2de455fa87e8dfe3", [tag: "v4.1.0"]},
   "idna": {:git, "git://github.com/benoitc/erlang-idna.git", "21aa158b7f36bf2a000f12fe40d7f21eece9cf65", [tag: "hackney-0.11.2"]},
-  "lager": {:git, "https://github.com/basho/lager.git", "4d8291edb72a25ac0efde907e2ecaa115108ff90", []}}
+  "lager": {:git, "https://github.com/basho/lager.git", "4d8291edb72a25ac0efde907e2ecaa115108ff90", []},
+  "xmlrpc": {:git, "http://github.com/etnt/xmlrpc", "a60831ac7d9a82c82986afeae5ae5652b323e1e1", [branch: "master"]}}

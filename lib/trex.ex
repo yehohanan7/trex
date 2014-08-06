@@ -15,7 +15,7 @@ defmodule Trex do
   #External APIs
   def download(file) do
     {:ok, data} = File.read("test/data/fifa.torrent")
-    Torrent.start(parse(data))
+    data |> parse |> Torrent.start
   end
 
 end

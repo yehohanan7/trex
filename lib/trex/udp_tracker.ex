@@ -2,19 +2,20 @@ defmodule Trex.UDPTracker do
   @behaviour :gen_fsm
   alias Trex.UDPConnector, as: Connector
   alias Trex.Torrent
+  import Trex.Url
   import Trex.UDP.Messages
 
   @time_out 0
   @retry_interval 8000
 
   #External API
-  def start_link(id, {host, port}, torrent) do
-    :gen_fsm.start_link({:local, id}, __MODULE__, {id, host, port, torrent}, [])
+  def start_link(info_hash, url, torrent_pid) do
+    :gen_fsm.start_link(__MODULE__, {info_hash, parse_url(url), torrent_pid}, [])
   end
 
   #GenFSM Callbacks
-  def init({id, host, port, torrent}) do
-    {:ok, :initialized, %{id: id, remote_tracker: {host, port}, torrent: torrent}, @time_out}
+  def init({info_hash, {host, port}, torrent_pid}) do
+    {:ok, :initialized, %{remote_tracker: {host, port}, info_hash: info_hash, torrent_pid: torrent_pid}, @time_out}
   end
 
   def terminate(_reason, _statename, _state) do
@@ -22,28 +23,29 @@ defmodule Trex.UDPTracker do
   end
 
   #private utility methods
-  def send(message, connector_pid, target) do
-    case Connector.send(connector_pid, target, message) do
+  def send_message(message, connector) do
+    case Connector.send(connector, message) do
       {:error, reason} -> IO.inspect "error while sending request : #{reason}"
       _ -> :ok
     end
   end
 
   #States
-  def initialized(event, state) do
-    new_state = state
-                |> Dict.put(:connector, Connector.new(0, self()))
-                |> Dict.put(:transaction_id, :crypto.rand_bytes(4))
-    {:next_state, :connector_ready, new_state, @time_out}
+  def initialized(event, %{remote_tracker: {host, port}} = state) do
+    {:next_state, :connector_ready, Dict.put(state, :connector, Connector.new(host, port, self())), @time_out}
   end
-  
-  def connector_ready(_event, %{connector: {connector_pid, port}, remote_tracker: remote_tracker, transaction_id: transaction_id} = state) do
-    connect_request(transaction_id) 
-    |> send(connector_pid, remote_tracker)    
-    {:next_state, :connecting, state}
+
+  def connector_ready(_event, state) do
+    {:next_state, :transaction_ready, Dict.put(state, :transaction_id, :crypto.rand_bytes(4)), @time_out}
   end
+
+  def transaction_ready(_event, %{connector: connector, transaction_id: transaction_id} = state) do
+    connect_request(transaction_id) |> send_message(connector)    
+    {:next_state, :awaiting_connection, state}
+  end
+
   
-  def connecting(packet, state) do
+  def awaiting_connection(packet, state) do
     {:connection_id, connection_id} = parse_response(packet, state[:transaction_id])
     {:next_state, :connected, Dict.put(state, :connection_id, connection_id), @time_out}
   end
@@ -53,19 +55,18 @@ defmodule Trex.UDPTracker do
     {:next_state, :announcing, state, @time_out}
   end
   
-  def announcing(_event, %{connector: {connector_pid, port}, connection_id: connection_id, transaction_id: transaction_id, torrent: torrent} = state) do
-    announce_request(transaction_id, connection_id, torrent[:info_hash], port) 
-    |> send(connector_pid, state[:remote_tracker])
+  def announcing(_event, %{connector: connector, connection_id: connection_id, transaction_id: transaction_id, info_hash: info_hash} = state) do
+    announce_request(transaction_id, connection_id, info_hash, Connector.local_port(connector)) 
+    |> send_message(connector)
     {:next_state, :announced, state}
   end
 
-  def announced(packet, %{torrent: torrent} = state) do
+  def announced(packet, state) do
     IO.inspect "announce response received"
 
     case parse_response(packet, state[:transaction_id]) do
       %{peers: peers, interval: interval} -> 
-        Torrent.peers_found({:peers, peers})
-        {:next_state, :announcing, state, interval * 1000}
+        Torrent.peers_found({:peers, peers});{:next_state, :announcing, state, interval * 1000}
 
        _ -> {:next_state, :initialized, state, @time_out}
     end

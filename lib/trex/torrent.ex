@@ -1,7 +1,5 @@
 defmodule Trex.Torrent do
-  @moduledoc """
 
-  """
   use GenServer
   alias Trex.TrackerSupervisor
   alias Trex.TrackerList
@@ -9,7 +7,7 @@ defmodule Trex.Torrent do
   def start(torrent) do
     torrent_pid = GenServer.start_link(__MODULE__, torrent, [])
     for url <- [torrent[:announce] | torrent[:announce_list]] ++ TrackerList.all do
-      TrackerSupervisor.start_tracker(url, torrent)
+      TrackerSupervisor.start_tracker(torrent[:info_hash], url, torrent_pid)
     end
   end
   

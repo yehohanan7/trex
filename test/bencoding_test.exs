@@ -33,6 +33,5 @@ defmodule TestBEncoding do
     test "decode dict" do
       assert(%{"test" => "value"} == decode('d4:test5:valuee'))
     end
-
     
 end

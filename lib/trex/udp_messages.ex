@@ -12,7 +12,7 @@ defmodule Trex.UDP.Messages do
             :started   => 2,
             :stopped   => 3}
 
-  defp to_binary(<<b::binary>> = value), do: value
+  defp to_binary(<<_::binary>> = value), do: value
 
   defp to_binary({value, bytes}) do
     bits = bytes * 8

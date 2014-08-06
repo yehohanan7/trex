@@ -1,7 +1,6 @@
 defmodule Trex.TorrentSupervisor do
   use Supervisor
   import Trex.Parser
-  import Trex.Lambda
 
   #External API
   def start_child(torrent) do    

@@ -10,23 +10,23 @@ defmodule Trex.HttpTracker do
   @events %{:started => "started", :stopped => "stopped", :completed => "completed"}
 
   #External API
-  def start_link(id, url, torrent) do
-    :gen_fsm.start_link({:local, id}, __MODULE__, {id, url, torrent}, [])
+  def start_link(info_hash, url, torrent_pid) do
+    :gen_fsm.start_link(__MODULE__, {info_hash, url, torrent_pid}, [])
   end
 
   #GenFSM Callbacks
-  def init({id, url, torrent}) do
-    {:ok, :initialized, %{id: id, url: url, torrent: torrent}, @time_out}
+  def init({info_hash, url, torrent_pid}) do
+    {:ok, :initialized, %{info_hash: info_hash, url: url, torrent_pid: torrent_pid}, @time_out}
   end
 
-  def terminate(_reason, _statename, %{url: url, torrent: torrent}) do
+  def terminate(_reason, _statename, state) do
     #announce(url, torrent[:info_hash], @events[:stopped]);
     :ok
   end
 
   #States
-  def initialized(event, %{url: url, torrent: torrent} = state) do
-    %{peers: peers, interval: interval} = announce(url, torrent[:info_hash], @events[:started])
+  def initialized(event, %{info_hash: info_hash, url: url} = state) do
+    %{peers: peers, interval: interval} = announce(url, info_hash, @events[:started])
     Torrent.peers_found({:peers, peers})
     {:next_state, :initialized, Dict.put(state, :peers, peers), interval * 1000}
   end

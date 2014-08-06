@@ -3,34 +3,38 @@ defmodule Trex.UDPConnector do
 
   #External API
 
-  def new(port, handler_pid) do
-    {:ok, pid} = :gen_server.start_link(__MODULE__, [port, handler_pid], [])
-    {:ok, port} = :gen_server.call(pid, :get_port)
-    {pid, port}
+  def new(remote_host, remote_port, handler_pid) do
+    {:ok, pid} = :gen_server.start_link(__MODULE__, [remote_host, remote_port, handler_pid], [])
+    pid
   end
 
-  def send(pid, {host, port}, message) do
-    :gen_server.call(pid, %{target: {host, port}, message: message})
+  def send(pid, message) do
+    :gen_server.call(pid, {:send, message})
+  end
+
+  def local_port(pid) do
+    {:ok, port} = :gen_server.call(pid, :get_port)
+    port
   end
 
   #GenServer Callbacks
-  def init([port, handler_pid]) do
-    {:ok, socket} = :gen_udp.open(port, [:binary, {:active, true}])
+  def init([remote_host, remote_port, handler]) do
+    {:ok, socket} = :gen_udp.open(0, [:binary, {:active, true}])
+    {:ok, %{socket: socket, remote_host: remote_host, remote_port: remote_port, handler: handler}}
+  end
+
+  def handle_call({:send, message}, _from, %{socket: socket, remote_host: remote_host, remote_port: remote_port} = state) do
+    {:reply, :gen_udp.send(socket, remote_host, remote_port, message), state}
+  end
+
+  def handle_call(:get_port, _from, %{socket: socket} = state) do
     {:ok, port} =  :inet.port(socket)
-    {:ok, %{:socket => socket, :handler => handler_pid, :port => port}}
-  end
-
-  def handle_call(%{target: {host, port}, message: message}, _from, %{socket: socket} = state) do
-    {:reply, :gen_udp.send(socket, host, port, message), state}
-  end
-
-  def handle_call(:get_port, _from, %{port: port} = state) do
     {:reply, {:ok, port}, state}
   end
 
   #Incoming messages from socket
-  def handle_info({:udp, _, _ip, _port, packet}, %{:handler => handler_pid} = state) do
-    :gen_fsm.send_event(handler_pid, packet)
+  def handle_info({:udp, _, _ip, _port, packet}, %{:handler => handler} = state) do
+    :gen_fsm.send_event(handler, packet)
     {:noreply, state}
   end
 
