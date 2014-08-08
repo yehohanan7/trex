@@ -15,7 +15,7 @@ defmodule Trex.HttpTracker do
 
   #GenFSM Callbacks
   def init({info_hash, url, torrent_pid}) do
-    {:ok, :initialized, %{info_hash: info_hash, url: url, torrent_pid: torrent_pid}, @time_out}
+    {:ok, :getting_peers, %{info_hash: info_hash, url: url, torrent_pid: torrent_pid}, @time_out}
   end
 
   def terminate(_reason, _statename, _state) do
@@ -24,11 +24,11 @@ defmodule Trex.HttpTracker do
   end
 
   #States
-  def initialized(event, %{info_hash: info_hash, url: url} = state) do
+  def getting_peers(event, %{info_hash: info_hash, url: url} = state) do
     try do
        %{peers: peers, interval: interval} = announce(url, info_hash, @events[:started])
        Torrent.peers_found(state[:torrent_pid], {:peers, peers})
-       {:next_state, :initialized, Dict.put(state, :peers, peers), interval * 1000}
+       {:next_state, :getting_peers, Dict.put(state, :peers, peers), interval * 1000}
     rescue
       _ in _ -> IO.inspect "#{url} timed out, hence stopping.."; {:stop, "timeout", state}
     end
