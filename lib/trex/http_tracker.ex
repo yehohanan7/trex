@@ -26,9 +26,13 @@ defmodule Trex.HttpTracker do
 
   #States
   def initialized(event, %{info_hash: info_hash, url: url} = state) do
-    %{peers: peers, interval: interval} = announce(url, info_hash, @events[:started])
-    Torrent.peers_found({:peers, peers})
-    {:next_state, :initialized, Dict.put(state, :peers, peers), interval * 1000}
+    try do
+       %{peers: peers, interval: interval} = announce(url, info_hash, @events[:started])
+       Torrent.peers_found({:peers, peers})
+       {:next_state, :initialized, Dict.put(state, :peers, peers), interval * 1000}
+    rescue
+      _ in _ -> IO.inspect "#{url} timed out, hence stopping.."; {:stop, "timeout", state}
+    end
   end
 
   #Event handlers
@@ -38,10 +42,22 @@ defmodule Trex.HttpTracker do
 
   #Private utility methods
   defp announce(url, info_hash, event) do
-    request = Messages.announce_request_params(info_hash, event)
-    %HTTPotion.Response{body: body} = HTTPotion.get(url <> request)
-    Messages.parse_response body
+    Messages.announce_request_params(url, info_hash, event)
+    |> http_get([{"User-Agent", "Trex"}])
+    |> Messages.parse_response
   end
 
+  defp http_get(url, headers) do
+    {:ok, _status, res_headers, client} = :hackney.request(:get, url, headers, "",[])
+    {:ok, body} = :hackney.body(client)    
+    case content_encoding(res_headers) do
+      {_, "gzip"} -> :zlib.gunzip body
+      _           -> body
+    end
+  end
+
+  defp content_encoding(res_headers) do
+    Enum.find(res_headers, fn {key, value} -> key == "Content-Encoding" end)
+  end
 
 end

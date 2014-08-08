@@ -8,7 +8,7 @@ defmodule Trex do
 
   def start(_,_) do
     IO.puts "Starting Trex supervisor..."
-    HTTPotion.start
+    :hackney.start
     Supervisor.start_link
   end
 

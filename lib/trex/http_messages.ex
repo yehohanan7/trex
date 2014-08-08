@@ -15,20 +15,19 @@ defmodule Trex.HTTP.Messages do
     }
   end
 
-  def announce_request_params(info_hash, event) do
+  def announce_request(url, info_hash, event) do
     params = %{"info_hash" => info_hash |> Hex.decode |> URI.encode,
                "peer_id"   => "ABCDEFGHIJKLMNOPQRST",
                "port"      => "7887",
                "uploaded"  => "0",
                "downloaded"=> "0",
                "left"      => "0",
-               #"compact"   => "1",
+               "event"     => event,
                "numwant"   => "200",
-               "no_peer_id"=> "1",
-               "event"     => event}
+               "no_peer_id"=> "1"}
               |> 
               Enum.reduce(<<>>, fn ({key, value}, acc) -> acc <> "#{key}=#{value}&" end)
-   "?" <> params
+   url <> "?" <> params
   end
 
 end

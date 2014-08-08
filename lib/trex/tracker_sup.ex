@@ -24,12 +24,12 @@ defmodule Trex.TrackerSupervisor do
 
   def start_tracker(info_hash, <<"http", _::binary>> = url, torrent_pid) do
     #IO.inspect "starting http tracker... #{url}"
-    #start(Trex.HttpTracker, info_hash,url, torrent_pid)
+    start(Trex.HttpTracker, info_hash,url, torrent_pid)
   end
 
   def start_tracker(info_hash, <<"udp", _::binary>> = url, torrent_pid) do
-    IO.inspect "starting udp tracker...#{url}"
-    start(Trex.UDPTracker, info_hash,url, torrent_pid)
+    #IO.inspect "starting udp tracker...#{url}"
+    #start(Trex.UDPTracker, info_hash,url, torrent_pid)
   end
 
 end
