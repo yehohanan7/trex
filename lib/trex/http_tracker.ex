@@ -5,7 +5,6 @@ defmodule Trex.HttpTracker do
   import IEx
 
   @time_out 0
-  @retry_interval 10000
 
   @events %{:started => "started", :stopped => "stopped", :completed => "completed"}
 
@@ -19,7 +18,7 @@ defmodule Trex.HttpTracker do
     {:ok, :initialized, %{info_hash: info_hash, url: url, torrent_pid: torrent_pid}, @time_out}
   end
 
-  def terminate(_reason, _statename, state) do
+  def terminate(_reason, _statename, _state) do
     #announce(url, torrent[:info_hash], @events[:stopped]);
     :ok
   end
@@ -36,13 +35,13 @@ defmodule Trex.HttpTracker do
   end
 
   #Event handlers
-  def handle_info(msg, state_name, state) do
+  def handle_info(_msg, _state_name, state) do
     raise "uknown message recieved from #{state[:url]}"
   end
 
   #Private utility methods
   defp announce(url, info_hash, event) do
-    Messages.announce_request_params(url, info_hash, event)
+    Messages.announce_request(url, info_hash, event)
     |> http_get([{"User-Agent", "Trex"}])
     |> Messages.parse_response
   end
@@ -57,7 +56,7 @@ defmodule Trex.HttpTracker do
   end
 
   defp content_encoding(res_headers) do
-    Enum.find(res_headers, fn {key, value} -> key == "Content-Encoding" end)
+    Enum.find(res_headers, fn {key, _} -> key == "Content-Encoding" end)
   end
 
 end
