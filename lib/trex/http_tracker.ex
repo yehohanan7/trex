@@ -27,7 +27,7 @@ defmodule Trex.HttpTracker do
   def initialized(event, %{info_hash: info_hash, url: url} = state) do
     try do
        %{peers: peers, interval: interval} = announce(url, info_hash, @events[:started])
-       Torrent.peers_found({:peers, peers})
+       Torrent.peers_found(state[:torrent_pid], {:peers, peers})
        {:next_state, :initialized, Dict.put(state, :peers, peers), interval * 1000}
     rescue
       _ in _ -> IO.inspect "#{url} timed out, hence stopping.."; {:stop, "timeout", state}

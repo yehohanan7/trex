@@ -66,7 +66,7 @@ defmodule Trex.UDPTracker do
 
     case parse_response(packet, state[:transaction_id]) do
       %{peers: peers, interval: interval} -> 
-        Torrent.peers_found({:peers, peers});{:next_state, :announcing, state, interval * 1000}
+        Torrent.peers_found(state[:torrent_pid], {:peers, peers});{:next_state, :announcing, state, interval * 1000}
 
        _ -> {:next_state, :initialized, state, @time_out}
     end
