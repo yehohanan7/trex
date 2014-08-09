@@ -6,7 +6,6 @@ defmodule Trex.UDPTracker do
   import Trex.UDP.Messages
 
   @time_out 0
-  @retry_interval 8000
 
   #External API
   def start_link(url, tpid) do
@@ -62,7 +61,6 @@ defmodule Trex.UDPTracker do
   end
 
   def announced(packet, %{tpid: tpid} = state) do
-    IO.inspect "announce response received"
 
     case parse_response(packet, state[:transaction_id]) do
 

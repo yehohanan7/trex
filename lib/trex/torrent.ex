@@ -3,10 +3,10 @@ defmodule Trex.Torrent do
   alias Trex.TrackerSupervisor
   alias Trex.TrackerList
   alias Trex.BEncoding
-  import IEx
 
   #External API
   def start(torrent) do
+    IO.inspect torrent
     {:ok, tpid} = GenServer.start_link(__MODULE__, Dict.put(torrent, :peers, []), [])
     for url <- trackers(tpid) do
       TrackerSupervisor.start_tracker(url, tpid)
@@ -26,7 +26,7 @@ defmodule Trex.Torrent do
   end
 
   def trackers(pid) do
-    [value(pid, "announce") | Enum.map(value(pid, "announce-list"), fn [v] -> v end)] ++ TrackerList.all
+    [value(pid, "announce") | Enum.map(value(pid, "announce-list"), fn [v] -> v end) ++ TrackerList.all]
   end
 
   def files(pid) do
