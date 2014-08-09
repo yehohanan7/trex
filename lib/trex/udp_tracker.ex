@@ -1,7 +1,7 @@
 defmodule Trex.UDPTracker do
   @behaviour :gen_fsm
   alias Trex.UDPConnector, as: Connector
-  alias Trex.Torrent
+  import Trex.Torrent
   import Trex.Url
   import Trex.UDP.Messages
 
@@ -9,13 +9,13 @@ defmodule Trex.UDPTracker do
   @retry_interval 8000
 
   #External API
-  def start_link(info_hash, url, torrent_pid) do
-    :gen_fsm.start_link(__MODULE__, {info_hash, parse_url(url), torrent_pid}, [])
+  def start_link(url, t_pid) do
+    :gen_fsm.start_link(__MODULE__, {parse_url(url), t_pid}, [])
   end
 
   #GenFSM Callbacks
-  def init({info_hash, {host, port}, torrent_pid}) do
-    {:ok, :initialized, %{remote_tracker: {host, port}, info_hash: info_hash, torrent_pid: torrent_pid}, @time_out}
+  def init({{host, port}, t_pid}) do
+    {:ok, :initialized, %{remote_tracker: {host, port}, t_pid: t_pid}, @time_out}
   end
 
   def terminate(_reason, _statename, _state) do
@@ -55,19 +55,19 @@ defmodule Trex.UDPTracker do
     {:next_state, :announcing, state, @time_out}
   end
   
-  def announcing(_event, %{connector: connector, connection_id: connection_id, transaction_id: transaction_id, info_hash: info_hash} = state) do
-    announce_request(transaction_id, connection_id, info_hash, Connector.local_port(connector)) 
+  def announcing(_event, %{connector: connector, connection_id: connection_id, transaction_id: transaction_id, t_pid: t_pid} = state) do
+    announce_request(transaction_id, connection_id, t_infohash(t_pid), Connector.local_port(connector)) 
     |> send_message(connector)
     {:next_state, :announced, state}
   end
 
-  def announced(packet, state) do
+  def announced(packet, %{t_pid: t_pid} = state) do
     IO.inspect "announce response received"
 
     case parse_response(packet, state[:transaction_id]) do
 
       %{peers: peers, interval: interval} -> 
-        Torrent.peers_found(state[:torrent_pid], {:peers, peers})
+        peers_found(t_pid, {:peers, peers})
         {:next_state, :announcing, state, interval * 1000}
 
        _ -> {:next_state, :initialized, state, @time_out}

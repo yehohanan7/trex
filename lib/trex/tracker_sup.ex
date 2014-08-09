@@ -16,20 +16,20 @@ defmodule Trex.TrackerSupervisor do
     :crypto.hash(:sha, "#{url}-#{torrent_id}") |> Hex.encode |> String.to_atom
   end
 
-  defp start(module, info_hash, url, torrent_pid) do
-    args = [info_hash, url, torrent_pid]
+  defp start(module, url, torrent_pid) do
+    args = [url, torrent_pid]
     options = [id: make_ref(), strategy: :one_for_one, max_restarts: 10]
     :supervisor.start_child(:tracker_sup, worker(module, args, options))
   end
 
-  def start_tracker(info_hash, <<"http", _::binary>> = url, torrent_pid) do
+  def start_tracker(<<"http", _::binary>> = url, torrent_pid) do
     IO.inspect "starting http tracker... #{url}"
-    start(Trex.HttpTracker, info_hash,url, torrent_pid)
+    start(Trex.HttpTracker, url, torrent_pid)
   end
 
-  def start_tracker(info_hash, <<"udp", _::binary>> = url, torrent_pid) do
+  def start_tracker(<<"udp", _::binary>> = url, torrent_pid) do
     IO.inspect "starting udp tracker...#{url}"
-    start(Trex.UDPTracker, info_hash,url, torrent_pid)
+    start(Trex.UDPTracker, url, torrent_pid)
   end
 
 end
