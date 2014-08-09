@@ -13,7 +13,7 @@ defmodule Trex.Torrent do
     end
   end
 
-  def peers_found(pid, {:peers, peers}) do
+  def update_peers(pid, {:peers, peers}) do
     GenServer.cast(pid, {:peers, peers})
   end
 
@@ -22,27 +22,27 @@ defmodule Trex.Torrent do
   end
 
   def name(pid) do
-    attr(pid, "name")
+    value(pid, "name")
   end
 
   def trackers(pid) do
-    [attr(pid, "announce") | Enum.map(attr(pid, "announce-list"), fn [v] -> v end)] ++ TrackerList.all
+    [value(pid, "announce") | Enum.map(value(pid, "announce-list"), fn [v] -> v end)] ++ TrackerList.all
   end
 
   def files(pid) do
-    multi_file_mapper = fn file -> %{length: file["length"], path: file["path"]} end
-    case info(pid) do
-      %{"length" => length, "name" => name} -> [%{:name => name, :length => length}]
-      %{"files" => files} ->   Enum.map(files, multi_file_mapper)
+    files = case info(pid) do
+      %{"files" => files} -> files 
+      file -> [file]
     end
+    Enum.map(files, fn file -> %{length: file["length"], path: file["path"]} end)
   end
 
   #private
   defp info(pid) do
-    attr(pid, "info")
+    value(pid, "info")
   end
 
-  defp attr(pid, key) do
+  defp value(pid, key) do
     GenServer.call(pid, {:get_attr, key})
   end
   
