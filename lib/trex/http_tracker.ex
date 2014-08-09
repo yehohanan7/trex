@@ -1,7 +1,7 @@
 defmodule Trex.HttpTracker do
   @behaviour :gen_fsm
   alias Trex.HTTP.Messages
-  import Trex.Torrent
+  alias Trex.Torrent
   import IEx
 
   @time_out 0
@@ -9,13 +9,13 @@ defmodule Trex.HttpTracker do
   @events %{:started => "started", :stopped => "stopped", :completed => "completed"}
 
   #External API
-  def start_link(url, t_pid) do
-    :gen_fsm.start_link(__MODULE__, {url, t_pid}, [])
+  def start_link(url, tpid) do
+    :gen_fsm.start_link(__MODULE__, {url, tpid}, [])
   end
 
   #GenFSM Callbacks
-  def init({url, t_pid}) do
-    {:ok, :getting_peers, %{url: url, t_pid: t_pid}, @time_out}
+  def init({url, tpid}) do
+    {:ok, :getting_peers, %{url: url, tpid: tpid}, @time_out}
   end
 
   def terminate(_reason, _statename, _state) do
@@ -24,10 +24,10 @@ defmodule Trex.HttpTracker do
   end
 
   #States
-  def getting_peers(event, %{url: url, t_pid: t_pid} = state) do
+  def getting_peers(event, %{url: url, tpid: tpid} = state) do
     try do
-       %{peers: peers, interval: interval} = announce(url, t_infohash(t_pid), @events[:started])
-       peers_found(t_pid, {:peers, peers})
+       %{peers: peers, interval: interval} = announce(url, Torrent.infohash(tpid), @events[:started])
+       Torrent.peers_found(tpid, {:peers, peers})
        {:next_state, :getting_peers, Dict.put(state, :peers, peers), interval * 1000}
     rescue
       _ in _ -> IO.inspect "#{url} timed out, hence stopping.."; {:stop, "timeout", state}

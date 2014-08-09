@@ -7,9 +7,9 @@ defmodule Trex.Torrent do
 
   #External API
   def start(torrent) do
-    {:ok, torrent_pid} = GenServer.start_link(__MODULE__, Dict.put(torrent, :peers, []), [])
-    for url <- t_trackers(torrent_pid) do
-      TrackerSupervisor.start_tracker(url, torrent_pid)
+    {:ok, tpid} = GenServer.start_link(__MODULE__, Dict.put(torrent, :peers, []), [])
+    for url <- trackers(tpid) do
+      TrackerSupervisor.start_tracker(url, tpid)
     end
   end
 
@@ -17,36 +17,34 @@ defmodule Trex.Torrent do
     GenServer.cast(pid, {:peers, peers})
   end
 
-  def t_infohash(pid) do
-    :crypto.hash(:sha, BEncoding.encode(t_info(pid))) |> Hex.encode
+  def infohash(pid) do
+    :crypto.hash(:sha, BEncoding.encode(info(pid))) |> Hex.encode
   end
 
-  def t_name(pid) do
+  def name(pid) do
     attr(pid, "name")
   end
 
-  def t_trackers(pid) do
-    alist = attr(pid, "announce-list")
+  def trackers(pid) do
     [attr(pid, "announce") | Enum.map(attr(pid, "announce-list"), fn [v] -> v end)] ++ TrackerList.all
   end
 
-  def t_files(pid) do
+  def files(pid) do
     multi_file_mapper = fn file -> %{length: file["length"], path: file["path"]} end
-    case t_info(pid) do
+    case info(pid) do
       %{"length" => length, "name" => name} -> [%{:name => name, :length => length}]
       %{"files" => files} ->   Enum.map(files, multi_file_mapper)
     end
   end
 
   #private
-  defp t_info(pid) do
-    GenServer.call(pid, {:get_attr, "info"})
+  defp info(pid) do
+    attr(pid, "info")
   end
 
   defp attr(pid, key) do
     GenServer.call(pid, {:get_attr, key})
   end
-
   
   #Callbacks
   def init(torrent) do

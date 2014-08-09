@@ -1,7 +1,6 @@
 defmodule Trex.TrackerSupervisor do
   use Supervisor
   import Trex.Url
-  import Trex.Lambda
 
   def start_link do
     :supervisor.start_link({:local, :tracker_sup}, __MODULE__, [])
