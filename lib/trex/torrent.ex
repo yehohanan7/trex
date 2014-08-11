@@ -6,7 +6,6 @@ defmodule Trex.Torrent do
 
   #External API
   def start(torrent) do
-    IO.inspect torrent
     {:ok, tpid} = GenServer.start_link(__MODULE__, Dict.put(torrent, :peers, []), [])
     for url <- trackers(tpid) do
       TrackerSupervisor.start_tracker(url, tpid)
