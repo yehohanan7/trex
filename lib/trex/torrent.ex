@@ -29,11 +29,11 @@ defmodule Trex.Torrent do
   end
 
   def files(pid) do
-    files = case info(pid) do
+    case info(pid) do
       %{"files" => files} -> files 
       file -> [file]
     end
-    Enum.map(files, fn file -> %{length: file["length"], path: file["path"]} end)
+    |> Enum.map(fn file -> %{length: file["length"], path: file["path"]} end)
   end
 
   #private
