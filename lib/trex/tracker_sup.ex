@@ -11,10 +11,6 @@ defmodule Trex.TrackerSupervisor do
     supervise([], strategy: :one_for_one)
   end
 
-  defp unique_id(torrent_id, url) do
-    :crypto.hash(:sha, "#{url}-#{torrent_id}") |> Hex.encode |> String.to_atom
-  end
-
   defp start(module, url, torrent_pid) do
     args = [url, torrent_pid]
     options = [id: make_ref(), strategy: :one_for_one, max_restarts: 10]
