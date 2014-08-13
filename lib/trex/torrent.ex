@@ -3,10 +3,11 @@ defmodule Trex.Torrent do
   alias Trex.TrackerSupervisor
   alias Trex.TrackerList
   alias Trex.BEncoding
+  alias Trex.Peer
 
   #External API
   def start(torrent) do
-    {:ok, tpid} = GenServer.start_link(__MODULE__, Dict.put(torrent, :peers, []), [])
+    {:ok, tpid} = GenServer.start_link(__MODULE__, Dict.put(torrent, :peers, HashSet.new), [])
     for url <- trackers(tpid) do
       TrackerSupervisor.start_tracker(url, tpid)
     end
@@ -50,9 +51,12 @@ defmodule Trex.Torrent do
     {:ok, torrent}
   end
 
-  def handle_cast({:peers, peers}, state) do
-    IO.inspect "#{length state[:peers]} peers found"
-    {:noreply, Dict.put(state, :peers, peers ++ state[:peers])}
+  def handle_cast({:peers, new_peers}, %{peers: peers} = state) do
+    new_peers 
+    |> Stream.filter(fn peer -> not(Set.member?(peers, peer)) end) 
+    |> Stream.map(fn peer -> Peer.start(peer, self()); peer end)
+    |> Enum.into(peers)
+    |> (fn updated_peers -> {:noreply, Dict.put(state, :peers, updated_peers)} end).()
   end
 
   def handle_call({:get_attr, key}, _from, state) do
