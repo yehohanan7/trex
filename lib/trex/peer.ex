@@ -1,7 +1,9 @@
 defmodule Trex.Peer do
-  use GenServer
+  @behaviour :gen_fsm
   alias Trex.Torrent
   alias Trex.PeerSupervisor
+
+  @time_out 0
 
   #External API
   def start({host, port}, tpid) do
@@ -9,17 +11,21 @@ defmodule Trex.Peer do
   end
 
   def start_link(host, port, tpid) do
-    GenServer.start_link(__MODULE__, {host, port, tpid})
+    :gen_fsm.start_link(__MODULE__, {host, port, tpid}, [])
   end
 
   #GenServer Callbacks
   def init({host, port, tpid}) do
-    IO.inspect "peer started for #{host} #{port}"
-    {:ok, %{host: host, port: port, tpid: tpid}}
+    {:ok, :initialized, %{host: host, port: port, tpid: tpid}, @time_out}
   end
 
-  def terminate(_reason, _state) do
+  def terminate(_reason, _statename, _state) do
     :ok
+  end
+
+  def initialized(_event, %{host: host, port: port} = state) do
+    IO.inspect "peer initialized for #{host} #{port}"
+    {:next_state, :initialized, state}
   end
 
   def handle_info(_timeout, state) do
