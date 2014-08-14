@@ -13,7 +13,7 @@ defmodule Trex.TrackerSupervisor do
 
   defp start(module, url, torrent_pid) do
     args = [url, torrent_pid]
-    options = [id: make_ref(), strategy: :one_for_one, max_restarts: 2]
+    options = [id: make_ref(), strategy: :one_for_one, max_restarts: 2, restart: :transient]
     :supervisor.start_child(:tracker_sup, worker(module, args, options))
   end
 

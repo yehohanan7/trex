@@ -4,7 +4,7 @@ defmodule Trex.UDPConnector do
   #External API
 
   def new(remote_host, remote_port, handler_pid) do
-    {:ok, pid} = :gen_server.start_link(__MODULE__, [remote_host, remote_port, handler_pid], [])
+    {:ok, pid} = :gen_server.start_link(__MODULE__, [to_char_list(remote_host), remote_port, handler_pid], [])
     pid
   end
 
