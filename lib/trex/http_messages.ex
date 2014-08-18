@@ -4,7 +4,7 @@ defmodule Trex.HTTP.Messages do
   def parse_response(data) do
     %{"peers" => peers, "interval" => interval} = data |> String.strip |> :binary.bin_to_list |> BEncoding.decode
     %{
-      :peers    => peers |> Enum.map(fn (%{"ip" => ip, "port" => port}) -> {to_char_list(ip), port} end),
+      :peers    => peers |> Enum.map(fn (%{"ip" => ip, "port" => port}) -> {ip, port} end),
       :interval => interval
     }
   end
