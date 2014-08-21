@@ -5,6 +5,8 @@ defmodule Trex.Peer do
 
   @time_out 0
 
+  @next :timeout
+
   @peer_id 1234
   @handshake_header <<19::8, "BitTorrent protocol", 0::64>>
   @handshake_response_size 68
@@ -27,15 +29,18 @@ defmodule Trex.Peer do
     :ok
   end
 
-  def initializing(:timeout, %{host: host, port: port, tpid: tpid} = state) do
+  def initializing(@next, %{port: 0} = state) do
+    {:stop, "invalid port", state}
+  end
+
+  def initializing(@next, %{host: host, port: port, tpid: tpid} = state) do
     case :gen_tcp.connect(to_char_list(host), port, [:binary, {:active, false}]) do
       {:ok, sock} -> {:next_state, :initialized, %{sock: sock, tpid: tpid}, @time_out}
-      {:error, reason} -> {:stop, "error while connecting to peer... #{self}", state}
+      {:error, reason} -> {:stop, "error while connecting to peer... #{host}:#{port}", state}
     end
   end
 
-
-  def initialized(_event, %{sock: sock, tpid: tpid} = state) do
+  def initialized(@next, %{sock: sock, tpid: tpid} = state) do
     :ok = :gen_tcp.send(sock, @handshake_header)
     :ok = :gen_tcp.send(sock, Torrent.infohash(tpid) |> Hex.decode)
     :ok = :gen_tcp.send(sock, <<@peer_id::160>>)
