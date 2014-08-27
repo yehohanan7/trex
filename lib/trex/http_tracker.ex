@@ -32,7 +32,7 @@ defmodule Trex.HttpTracker do
       Torrent.update_peers(tpid, {:peers, peers})
       {:noreply, Dict.put(state, :peers, peers), interval * 1000}
     rescue
-      e in _ -> {:stop, "error while fetching peers from #{url}", state}
+      e in _ -> IO.inspect "error while fetching peers from #{url}"; {:stop, :shutdown, state}
     end
   end
 

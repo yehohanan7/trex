@@ -30,13 +30,14 @@ defmodule Trex.Peer do
   end
 
   def initializing(@next, %{port: 0} = state) do
-    {:stop, "invalid port", state}
+    IO.inspect "invalid port"
+    {:stop, :shutdown, state}
   end
 
   def initializing(@next, %{host: host, port: port, tpid: tpid} = state) do
     case :gen_tcp.connect(to_char_list(host), port, [:binary, {:active, false}]) do
       {:ok, sock} -> {:next_state, :initialized, %{sock: sock, tpid: tpid}, @time_out}
-      {:error, reason} -> {:stop, "error while connecting to peer... #{host}:#{port}", state}
+      {:error, reason} -> IO.inspect "error while connecting to peer... #{host}:#{port}"; {:stop, :shutdown, state}
     end
   end
 
@@ -50,12 +51,13 @@ defmodule Trex.Peer do
   def handshake_initiated(event, %{sock: sock} = state) do
     case :gen_tcp.recv(sock, @handshake_response_size) do
       {:ok, data} -> IO.inspect "hand shake response recieved.."; IO.inspect data; {:next_state, :handshake_completed, state}
-      {:error, reason} -> {:stop, "error while handshaking..", state}                                                                            
+      {:error, reason} -> IO.inspect "error while handshaking.."; {:stop, :shutdown, state}
     end
   end
 
   def handle_info(msg, statename, state) do
-    {:stop, "unknown message... #{statename}", state}
+    IO.inspect "unknown message... #{statename}"
+    {:stop, :shutdown, state}
   end
 
 end

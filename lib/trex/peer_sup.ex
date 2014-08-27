@@ -12,7 +12,7 @@ defmodule Trex.PeerSupervisor do
   end
 
   def start_peer(host, port, tpid) do
-    options = [id: make_ref(), strategy: :one_for_one, max_restarts: 2, restart: :transient]
+    options = [id: make_ref(), strategy: :one_for_one, restart: :transient]
     :supervisor.start_child(:peer_sup, worker(Trex.Peer, [host, port, tpid], options))
   end
 
