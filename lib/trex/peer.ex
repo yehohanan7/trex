@@ -6,7 +6,6 @@ defmodule Trex.Peer do
   alias Trex.PeerSupervisor
 
   @time_out 0
-
   @next :timeout
   @handshake_header <<19::8, "BitTorrent protocol", 0::64>>
   @handshake_response_size 68
@@ -37,7 +36,7 @@ defmodule Trex.Peer do
   def initializing(@next, %{host: host, port: port, tpid: tpid} = state) do
     case :gen_tcp.connect(to_char_list(host), port, [:binary, {:active, false}]) do
       {:ok, sock} -> {:next_state, :initialized, %{sock: sock, tpid: tpid}, @time_out}
-      {:error, reason} -> IO.inspect "error while connecting to peer... #{host}:#{port}"; {:stop, :shutdown, state}
+      {:error, reason} -> {:stop, :shutdown, state}
     end
   end
 
@@ -50,11 +49,10 @@ defmodule Trex.Peer do
 
   def handshake_initiated(event, %{sock: sock} = state) do
     case :gen_tcp.recv(sock, @handshake_response_size) do
-      {:ok, data}      -> IO.inspect "hand shake response recieved.."
-                          data |> BEncoding.decode |> IO.inspect
+      {:ok, data}      -> <<19, "BitTorrent protocol", _::binary>> = data
                           {:next_state, :handshake_completed, state}
 
-      {:error, reason} -> IO.inspect "error while handshaking.."; {:stop, :shutdown, state}
+      {:error, reason} -> {:stop, :shutdown, state}
     end
   end
 
