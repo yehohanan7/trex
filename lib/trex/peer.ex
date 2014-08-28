@@ -1,5 +1,6 @@
 defmodule Trex.Peer do
   @behaviour :gen_fsm
+  alias Trex.BEncoding
   alias Trex.Torrent
   alias Trex.PeerSupervisor
 
@@ -50,7 +51,10 @@ defmodule Trex.Peer do
 
   def handshake_initiated(event, %{sock: sock} = state) do
     case :gen_tcp.recv(sock, @handshake_response_size) do
-      {:ok, data} -> IO.inspect "hand shake response recieved.."; IO.inspect data; {:next_state, :handshake_completed, state}
+      {:ok, data}      -> IO.inspect "hand shake response recieved.."
+                          data |> BEncoding.decode |> IO.inspect
+                          {:next_state, :handshake_completed, state}
+
       {:error, reason} -> IO.inspect "error while handshaking.."; {:stop, :shutdown, state}
     end
   end
