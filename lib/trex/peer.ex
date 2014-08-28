@@ -1,5 +1,6 @@
 defmodule Trex.Peer do
   @behaviour :gen_fsm
+  alias Trex.Config, as: Config
   alias Trex.BEncoding
   alias Trex.Torrent
   alias Trex.PeerSupervisor
@@ -7,8 +8,6 @@ defmodule Trex.Peer do
   @time_out 0
 
   @next :timeout
-
-  @peer_id 1234
   @handshake_header <<19::8, "BitTorrent protocol", 0::64>>
   @handshake_response_size 68
 
@@ -45,7 +44,7 @@ defmodule Trex.Peer do
   def initialized(@next, %{sock: sock, tpid: tpid} = state) do
     :ok = :gen_tcp.send(sock, @handshake_header)
     :ok = :gen_tcp.send(sock, Torrent.infohash(tpid) |> Hex.decode)
-    :ok = :gen_tcp.send(sock, <<@peer_id::160>>)
+    :ok = :gen_tcp.send(sock, Config.peer_id)
     {:next_state, :handshake_initiated, state, @time_out}
   end
 

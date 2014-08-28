@@ -1,5 +1,5 @@
 defmodule Trex.UDP.Messages do
-
+  alias Trex.Config, as: Config
   @default_interval 200
 
   @actions %{:connect   => 0,
@@ -36,7 +36,7 @@ defmodule Trex.UDP.Messages do
      action:          {@actions[:announce], 4},
      transaction_id:  transaction_id,
      info_hash:       info_hash |> Hex.decode,
-     peer_id:         {12345, 20},
+     peer_id:         Config.peer_id,
      downloaded:      {0, 8},
      left:            {0, 8},
      uploaded:        {0, 8},

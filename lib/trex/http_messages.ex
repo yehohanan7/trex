@@ -1,5 +1,6 @@
 defmodule Trex.HTTP.Messages do
   alias Trex.BEncoding
+  alias Trex.Config, as: Config
 
   def parse_response(data) do
     %{"peers" => peers, "interval" => interval} = data |> String.strip |> :binary.bin_to_list |> BEncoding.decode
@@ -11,7 +12,7 @@ defmodule Trex.HTTP.Messages do
 
   def announce_request(info_hash, url, event) do
     params = %{"info_hash" => info_hash |> Hex.decode |> URI.encode,
-               "peer_id"   => "ABCDEFGHIJKLMNOPQRST",
+               "peer_id"   => Config.peer_id,
                "port"      => "7887",
                "uploaded"  => "0",
                "downloaded"=> "0",
