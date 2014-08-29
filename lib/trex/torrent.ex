@@ -31,7 +31,7 @@ defmodule Trex.Torrent do
 
   def files(pid) do
     case info(pid) do
-      %{"files" => files} -> files 
+      %{"files" => files} -> files
       file -> [file]
     end
     |> Enum.map(fn file -> %{length: file["length"], path: file["path"]} end)
@@ -45,18 +45,23 @@ defmodule Trex.Torrent do
   defp value(pid, key) do
     GenServer.call(pid, {:get_attr, key})
   end
-  
+
   #Callbacks
   def init(torrent) do
     {:ok, torrent}
   end
 
   def handle_cast({:peers, new_peers}, %{peers: peers} = state) do
-    new_peers 
-    |> Stream.filter(fn peer -> not(Set.member?(peers, peer)) end) 
-    |> Stream.map(fn peer -> Peer.start(peer, self()); peer end)
+    is_not_member? = fn peer -> not(Set.member?(peers, peer)) end
+    start = fn peer -> Peer.start(peer, self()); peer end
+    update_state = fn peers -> {:noreply, Dict.put(state, :peers, peers)} end
+
+    new_peers
+    |> Stream.filter is_not_member?
+    |> Stream.map start
     |> Enum.into(peers)
-    |> (fn updated_peers -> {:noreply, Dict.put(state, :peers, updated_peers)} end).()
+    |> update_state.()
+
   end
 
   def handle_call({:get_attr, key}, _from, state) do

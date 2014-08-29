@@ -30,7 +30,7 @@ defmodule Trex.UDPTracker do
   end
 
   #States
-  def initialized(event, %{remote_tracker: {host, port}} = state) do
+  def initialized(_event, %{remote_tracker: {host, port}} = state) do
     {:next_state, :connector_ready, Dict.put(state, :connector, Connector.new(host, port, self())), @time_out}
   end
 

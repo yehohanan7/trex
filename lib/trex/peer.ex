@@ -1,7 +1,6 @@
 defmodule Trex.Peer do
   @behaviour :gen_fsm
   alias Trex.Config, as: Config
-  alias Trex.BEncoding
   alias Trex.Torrent
   alias Trex.PeerSupervisor
 
@@ -36,7 +35,7 @@ defmodule Trex.Peer do
   def initializing(@next, %{host: host, port: port, tpid: tpid} = state) do
     case :gen_tcp.connect(to_char_list(host), port, [:binary, {:active, false}]) do
       {:ok, sock} -> {:next_state, :initialized, %{sock: sock, tpid: tpid}, @time_out}
-      {:error, reason} -> {:stop, :shutdown, state}
+      {:error, _reason} -> {:stop, :shutdown, state}
     end
   end
 
@@ -47,16 +46,14 @@ defmodule Trex.Peer do
     {:next_state, :handshake_initiated, state, @time_out}
   end
 
-  def handshake_initiated(event, %{sock: sock} = state) do
+  def handshake_initiated(@next, %{sock: sock} = state) do
     case :gen_tcp.recv(sock, @handshake_response_size) do
-      {:ok, data}      -> <<19, "BitTorrent protocol", _::binary>> = data
-                          {:next_state, :handshake_completed, state}
-
-      {:error, reason} -> {:stop, :shutdown, state}
+      {:ok, <<19, "BitTorrent protocol", _::binary>>} -> {:next_state, :handshake_completed, state}
+      {:error, _reason} -> {:stop, :shutdown, state}
     end
   end
 
-  def handle_info(msg, statename, state) do
+  def handle_info(_msg, statename, state) do
     IO.inspect "unknown message... #{statename}"
     {:stop, :shutdown, state}
   end
