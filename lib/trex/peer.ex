@@ -48,9 +48,14 @@ defmodule Trex.Peer do
 
   def handshake_initiated(@next, %{sock: sock} = state) do
     case :gen_tcp.recv(sock, @handshake_response_size) do
-      {:ok, <<19, "BitTorrent protocol", _::binary>>} -> {:next_state, :handshake_completed, state}
+      {:ok, <<19, "BitTorrent protocol", _::binary>>} -> {:next_state, :handshake_completed, state, @time_out}
       {:error, _reason} -> {:stop, :shutdown, state}
     end
+  end
+
+  def handshake_completed(@next, state) do
+    IO.inspect "handshake completed..."
+    {:next_state, :handshake_completed, state}
   end
 
   def handle_info(_msg, statename, state) do

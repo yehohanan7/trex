@@ -52,16 +52,11 @@ defmodule Trex.Torrent do
   end
 
   def handle_cast({:peers, new_peers}, %{peers: peers} = state) do
-    is_not_member? = fn peer -> not(Set.member?(peers, peer)) end
-    start = fn peer -> Peer.start(peer, self()); peer end
-    update_state = fn peers -> {:noreply, Dict.put(state, :peers, peers)} end
-
-    new_peers
-    |> Stream.filter is_not_member?
-    |> Stream.map start
+    new_peers 
+    |> Stream.filter(fn peer -> not(Set.member?(peers, peer)) end) 
+    |> Stream.map(fn peer -> Peer.start(peer, self()); peer end)
     |> Enum.into(peers)
-    |> update_state.()
-
+    |> (fn updated_peers -> {:noreply, Dict.put(state, :peers, updated_peers)} end).()
   end
 
   def handle_call({:get_attr, key}, _from, state) do
