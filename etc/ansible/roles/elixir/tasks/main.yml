@@ -1,0 +1,13 @@
+---
+- name: Add erlang repositories
+  apt_repository: repo='deb http://packages.erlang-solutions.com/ubuntu trusty contrib' state=present
+  apt_repository: repo='deb http://packages.erlang-solutions.com/ubuntu saucy contrib' state=present
+  apt_repository: repo='deb http://packages.erlang-solutions.com/ubuntu precise contrib' state=present
+
+- name: Add erlang solutions public key
+  environment: proxy_env
+  apt_key: url=http://packages.erlang-solutions.com/debian/erlang_solutions.asc state=present
+
+- name: Install Elixir
+  environment: proxy_env
+  apt: name=elixir state=present

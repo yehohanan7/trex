@@ -1,0 +1,7 @@
+---
+- hosts: trex
+  remote_user: root
+  sudo: yes
+  roles:
+    - common
+    - elixir
