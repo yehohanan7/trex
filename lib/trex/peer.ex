@@ -3,6 +3,7 @@ defmodule Trex.Peer do
   alias Trex.Config, as: Config
   alias Trex.Torrent
   alias Trex.PeerSupervisor
+  require IEx
 
   @time_out 0
   @next :timeout
@@ -34,7 +35,7 @@ defmodule Trex.Peer do
 
   def initializing(@next, %{host: host, port: port, tpid: tpid} = state) do
     case :gen_tcp.connect(to_char_list(host), port, [:binary, {:active, false}]) do
-      {:ok, sock} -> {:next_state, :initialized, %{sock: sock, tpid: tpid}, @time_out}
+      {:ok, sock} -> {:next_state, :initialized, %{host: host, port: port, sock: sock, tpid: tpid}, @time_out}
       {:error, _reason} -> {:stop, :shutdown, state}
     end
   end
@@ -53,14 +54,28 @@ defmodule Trex.Peer do
     end
   end
 
-  def handshake_completed(@next, state) do
-    IO.inspect "handshake completed..."
-    {:next_state, :handshake_completed, state}
+  def handshake_completed(@next, %{host: host, port: port, tpid: tpid, sock: sock} = state) do
+    IO.inspect "handshake completed for #{host}:#{port}  hash: #{Torrent.infohash(tpid)}"
+    keep_alive(state)
+    {:next_state, :connected, state, @time_out}
   end
 
-  def handle_info(_msg, statename, state) do
-    IO.inspect "unknown message... #{statename}"
-    {:stop, :shutdown, state}
+  def connected(@next, %{sock: sock} = state) do
+    case :gen_tcp.recv(sock, 1) do
+      {:ok, 0}    -> IO.inspect "keep alive recieved"
+      {:ok, size} -> IO.inspect "other message recieved"
+    end
+    {:next_state, :connected, state, @time_out}
+  end
+
+  def handle_info(:keep_alive, statename, state) do
+    keep_alive(state)
+    {:next_state, statename, state}
+  end
+
+  def keep_alive(%{sock: sock} = state) do
+    :gen_tcp.send(sock, <<0,0,0,0>>)
+    :timer.send_after(6000, self(), :keep_alive)
   end
 
 end
