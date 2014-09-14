@@ -45,5 +45,4 @@ defmodule Trex.Peer do
     {:next_state, :connected, state}
   end
 
-
 end
