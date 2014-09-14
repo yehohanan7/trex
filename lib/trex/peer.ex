@@ -62,10 +62,11 @@ defmodule Trex.Peer do
 
   def connected(@next, %{sock: sock} = state) do
     case :gen_tcp.recv(sock, 1) do
-      {:ok, 0}    -> IO.inspect "keep alive recieved"
-      {:ok, size} -> IO.inspect "other message recieved"
+      {:ok, 0}    -> {:next_state, :connected, state, @time_out}
+      {:ok, size} -> {:next_state, :connected, state, @time_out}
+      {:error, :closed} -> {:stop, :shutdown, state}
     end
-    {:next_state, :connected, state, @time_out}
+    
   end
 
   def handle_info(:keep_alive, statename, state) do
