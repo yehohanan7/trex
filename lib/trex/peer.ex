@@ -61,13 +61,14 @@ defmodule Trex.Peer do
   end
 
   def connected(@next, %{sock: sock} = state) do
-    case :gen_tcp.recv(sock, 1) do
-      {:ok, 0}    -> {:next_state, :connected, state, @time_out}
-      {:ok, size} -> {:next_state, :connected, state, @time_out}
-      {:error, :closed} -> {:stop, :shutdown, state}
-    end
-    
+    sock |> do_recv
   end
+
+  def somestate(@next, %{sock: sock} = state) do
+    #handle this state
+    sock |> do_recv
+  end
+
 
   def handle_info(:keep_alive, statename, state) do
     keep_alive(state)
@@ -77,6 +78,14 @@ defmodule Trex.Peer do
   def keep_alive(%{sock: sock} = state) do
     :gen_tcp.send(sock, <<0,0,0,0>>)
     :timer.send_after(6000, self(), :keep_alive)
+  end
+
+  def do_recv(sock) do
+    case :gen_tcp.recv(sock, 1) do
+      {:ok, 0}    -> {:next_state, :connected, state, @time_out}
+      {:ok, size} -> {:next_state, :connected, state, @time_out}
+      {:error, :closed} -> {:stop, :shutdown, state}
+    end
   end
 
 end
