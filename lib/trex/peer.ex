@@ -3,6 +3,7 @@ defmodule Trex.Peer do
   alias Trex.Config, as: Config
   alias Trex.Torrent
   alias Trex.PeerSupervisor
+  alias Trex.PeerReceiver, as: Receiver
   require IEx
 
   @time_out 0
@@ -61,14 +62,24 @@ defmodule Trex.Peer do
   end
 
   def connected(@next, %{sock: sock} = state) do
-    sock |> do_recv
+    Receiver.start_link(sock, self())
+    {:next_state, :connected, state}
   end
 
-  def somestate(@next, %{sock: sock} = state) do
-    #handle this state
-    sock |> do_recv
+  def connected({:message, :error}, state) do
+    {:stop, :shutdown, state}
   end
 
+  def connected({:message, packet}, state) do
+    IO.inspect "message recieved"
+    IO.inspect packet
+    {:next_state, :connected, state}
+  end
+
+  def connected({:message, 0}, state) do
+    IO.inspect "keep alive message recieved"
+    {:next_state, :connected, state}
+  end
 
   def handle_info(:keep_alive, statename, state) do
     keep_alive(state)
@@ -79,13 +90,5 @@ defmodule Trex.Peer do
     :gen_tcp.send(sock, <<0,0,0,0>>)
     :timer.send_after(6000, self(), :keep_alive)
   end
-
-  def do_recv(sock) do
-    case :gen_tcp.recv(sock, 1) do
-      {:ok, 0}    -> {:next_state, :connected, state, @time_out}
-      {:ok, size} -> {:next_state, :connected, state, @time_out}
-      {:error, :closed} -> {:stop, :shutdown, state}
-    end
-  end
-
 end
+
